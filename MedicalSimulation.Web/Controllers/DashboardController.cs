@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MedicalSimulation.Core.Data;
+using MedicalSimulation.Core.Models;
 using System.Security.Claims;
 
 namespace MedicalSimulation.Web.Controllers;
@@ -27,6 +28,20 @@ public class DashboardController : Controller
             .OrderByDescending(up => up.StartedAt)
             .ToListAsync();
 
+        // Get feedback for user's attempts
+        var progressIds = userProgress.Select(up => up.Id).ToList();
+        var feedbacks = await _context.Feedbacks
+            .Include(f => f.Instructor)
+            .Where(f => progressIds.Contains(f.UserProgressId))
+            .ToListAsync();
+
+        // Get instructor details with specializations for feedback
+        var instructorIds = feedbacks.Select(f => f.InstructorId).Distinct().ToList();
+        var instructors = await _context.Instructors
+            .Include(i => i.Specialization)
+            .Where(i => instructorIds.Contains(i.ApplicationUserId))
+            .ToListAsync();
+
         var completedSimulations = userProgress
             .Where(up => up.IsCompleted)
             .GroupBy(up => up.SimulationId)
@@ -39,6 +54,8 @@ public class DashboardController : Controller
         ViewBag.TotalAttempts = totalAttempts;
         ViewBag.AverageScore = averageScore;
         ViewBag.RecentProgress = userProgress.Take(10).ToList();
+        ViewBag.Feedbacks = feedbacks;
+        ViewBag.Instructors = instructors;
 
         return View();
     }
@@ -52,6 +69,65 @@ public class DashboardController : Controller
             .OrderByDescending(up => up.StartedAt)
             .ToListAsync();
 
+        // Get student details for each attempt
+        var userIds = allProgress.Select(up => up.UserId).Distinct().ToList();
+        var students = await _context.Students
+            .Where(s => userIds.Contains(s.ApplicationUserId))
+            .ToListAsync();
+
+        // Get existing feedbacks
+        var progressIds = allProgress.Select(up => up.Id).ToList();
+        var feedbacks = await _context.Feedbacks
+            .Where(f => progressIds.Contains(f.UserProgressId))
+            .ToListAsync();
+
+        ViewBag.Students = students;
+        ViewBag.Feedbacks = feedbacks;
+
         return View(allProgress);
+    }
+
+    [Authorize(Roles = "Instructor")]
+    [HttpPost]
+    public async Task<IActionResult> GiveFeedback(int userProgressId, string feedbackText)
+    {
+        var instructorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        
+        var userProgress = await _context.UserProgress
+            .FirstOrDefaultAsync(up => up.Id == userProgressId);
+
+        if (userProgress == null)
+        {
+            return NotFound();
+        }
+
+        // Check if feedback already exists
+        var existingFeedback = await _context.Feedbacks
+            .FirstOrDefaultAsync(f => f.UserProgressId == userProgressId);
+
+        if (existingFeedback != null)
+        {
+            // Update existing feedback
+            existingFeedback.FeedbackText = feedbackText;
+            existingFeedback.CreatedAt = DateTime.UtcNow;
+        }
+        else
+        {
+            // Create new feedback
+            var feedback = new Feedback
+            {
+                UserProgressId = userProgressId,
+                SimulationId = userProgress.SimulationId,
+                StudentId = userProgress.UserId,
+                InstructorId = instructorId!,
+                FeedbackText = feedbackText,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Feedbacks.Add(feedback);
+        }
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(InstructorIndex));
     }
 }

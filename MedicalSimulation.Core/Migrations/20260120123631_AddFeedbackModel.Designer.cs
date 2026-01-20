@@ -4,6 +4,7 @@ using MedicalSimulation.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MedicalSimulation.Core.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260120123631_AddFeedbackModel")]
+    partial class AddFeedbackModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -96,56 +99,15 @@ namespace MedicalSimulation.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SpecializationId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("SpecializationId");
-
-                    b.ToTable("Instructors");
-                });
-
-            modelBuilder.Entity("MedicalSimulation.Core.Models.InstructorSpecialization", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("Specialization")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("InstructorSpecializations");
+                    b.HasIndex("ApplicationUserId");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "Skin and related conditions",
-                            Name = "Dermatology"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "Brain and nervous system surgery",
-                            Name = "Neurosurgery"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "Heart and cardiovascular system",
-                            Name = "Cardiology"
-                        });
+                    b.ToTable("Instructors");
                 });
 
             modelBuilder.Entity("MedicalSimulation.Core.Models.Simulation", b =>
@@ -195,7 +157,7 @@ namespace MedicalSimulation.Core.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2026, 1, 20, 12, 51, 34, 524, DateTimeKind.Utc).AddTicks(2522),
+                            CreatedAt = new DateTime(2026, 1, 20, 12, 36, 30, 12, DateTimeKind.Utc).AddTicks(4774),
                             Description = "Master the subcuticular running suture technique with this interactive video simulation.",
                             Difficulty = 2,
                             EstimatedMinutes = 15,
@@ -208,7 +170,7 @@ namespace MedicalSimulation.Core.Migrations
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2026, 1, 20, 12, 51, 34, 524, DateTimeKind.Utc).AddTicks(5223),
+                            CreatedAt = new DateTime(2026, 1, 20, 12, 36, 30, 12, DateTimeKind.Utc).AddTicks(7729),
                             Description = "Learn the critical steps and anatomical considerations in performing a posterior neck craniectomy.",
                             Difficulty = 3,
                             EstimatedMinutes = 10,
@@ -853,15 +815,7 @@ namespace MedicalSimulation.Core.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MedicalSimulation.Core.Models.InstructorSpecialization", "Specialization")
-                        .WithMany("Instructors")
-                        .HasForeignKey("SpecializationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("ApplicationUser");
-
-                    b.Navigation("Specialization");
                 });
 
             modelBuilder.Entity("MedicalSimulation.Core.Models.Simulation", b =>
@@ -965,11 +919,6 @@ namespace MedicalSimulation.Core.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("MedicalSimulation.Core.Models.InstructorSpecialization", b =>
-                {
-                    b.Navigation("Instructors");
                 });
 
             modelBuilder.Entity("MedicalSimulation.Core.Models.Simulation", b =>

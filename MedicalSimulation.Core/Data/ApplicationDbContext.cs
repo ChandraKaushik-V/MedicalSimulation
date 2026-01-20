@@ -17,6 +17,8 @@ namespace MedicalSimulation.Core.Data
         public DbSet<UserProgress> UserProgress { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<Instructor> Instructors { get; set; }
+        public DbSet<Feedback> Feedbacks { get; set; }
+        public DbSet<InstructorSpecialization> InstructorSpecializations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -25,6 +27,13 @@ namespace MedicalSimulation.Core.Data
             // Seed Specialties
             builder.Entity<Specialty>().HasData(
                 new Specialty { Id = 1, Name = "Basic Surgical Skills", Description = "Fundamental techniques for all surgeons" }
+            );
+
+            // Seed InstructorSpecializations
+            builder.Entity<InstructorSpecialization>().HasData(
+                new InstructorSpecialization { Id = 1, Name = "Dermatology", Description = "Skin and related conditions" },
+                new InstructorSpecialization { Id = 2, Name = "Neurosurgery", Description = "Brain and nervous system surgery" },
+                new InstructorSpecialization { Id = 3, Name = "Cardiology", Description = "Heart and cardiovascular system" }
             );
 
             // Seed Simulation
@@ -244,6 +253,31 @@ namespace MedicalSimulation.Core.Data
                     LayersJson = "[]"
                 }
             );
+
+            // Configure Feedback relationships
+            builder.Entity<Feedback>()
+                .HasOne(f => f.Student)
+                .WithMany()
+                .HasForeignKey(f => f.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Feedback>()
+                .HasOne(f => f.Instructor)
+                .WithMany()
+                .HasForeignKey(f => f.InstructorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Feedback>()
+                .HasOne(f => f.UserProgress)
+                .WithMany()
+                .HasForeignKey(f => f.UserProgressId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Feedback>()
+                .HasOne(f => f.Simulation)
+                .WithMany()
+                .HasForeignKey(f => f.SimulationId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

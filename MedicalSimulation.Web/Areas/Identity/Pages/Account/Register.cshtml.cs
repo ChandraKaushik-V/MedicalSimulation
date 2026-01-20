@@ -1,9 +1,12 @@
 using MedicalSimulation.Core.Data;
 using MedicalSimulation.Core.Models;
+using MedicalSimulation.Core.Validation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace MedicalSimulation.Web.Areas.Identity.Pages.Account;
@@ -33,6 +36,8 @@ public class RegisterModel : PageModel
     public string? ReturnUrl { get; set; }
 
     public IList<AuthenticationScheme> ExternalLogins { get; set; } = default!;
+    
+    public List<SelectListItem> Specializations { get; set; } = new();
 
     public class InputModel
     {
@@ -42,15 +47,17 @@ public class RegisterModel : PageModel
         public string Email { get; set; } = default!;
 
         [Required]
+        [LettersOnly(ErrorMessage = "First name can only contain letters and spaces")]
         [Display(Name = "First Name")]
         public string FirstName { get; set; } = default!;
 
         [Required]
+        [LettersOnly(ErrorMessage = "Last name can only contain letters and spaces")]
         [Display(Name = "Last Name")]
         public string LastName { get; set; } = default!;
 
         [Required]
-        [Phone]
+        [PhoneNumberValidation(ErrorMessage = "Phone number must be exactly 10 digits")]
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; } = default!;
 
@@ -74,6 +81,7 @@ public class RegisterModel : PageModel
         public string? StudentId { get; set; }
 
         [Display(Name = "Year Level")]
+        [Range(1, 5, ErrorMessage = "Year level must be between 1 and 5")]
         public int? YearLevel { get; set; }
 
         // Instructor-specific fields
@@ -81,19 +89,38 @@ public class RegisterModel : PageModel
         public string? EmployeeId { get; set; }
 
         [Display(Name = "Specialization")]
-        public string? Specialization { get; set; }
+        public int? SpecializationId { get; set; }
     }
 
     public async Task OnGetAsync(string? returnUrl = null)
     {
         ReturnUrl = returnUrl;
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+        
+        // Load specializations for dropdown
+        Specializations = await _context.InstructorSpecializations
+            .Select(s => new SelectListItem { Value = s.Id.ToString(), Text = s.Name })
+            .ToListAsync();
     }
 
     public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
     {
         returnUrl ??= Url.Content("~/");
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+        
+        // Reload specializations for dropdown in case of validation error
+        Specializations = await _context.InstructorSpecializations
+            .Select(s => new SelectListItem { Value = s.Id.ToString(), Text = s.Name })
+            .ToListAsync();
+        
+        // Check phone number uniqueness
+        var phoneExists = await _context.Students.AnyAsync(s => s.PhoneNumber == Input.PhoneNumber) ||
+                          await _context.Instructors.AnyAsync(i => i.PhoneNumber == Input.PhoneNumber);
+        
+        if (phoneExists)
+        {
+            ModelState.AddModelError("Input.PhoneNumber", "This phone number is already registered.");
+        }
         
         if (ModelState.IsValid)
         {
@@ -140,7 +167,7 @@ public class RegisterModel : PageModel
                         Email = Input.Email,
                         PhoneNumber = Input.PhoneNumber,
                         EmployeeId = Input.EmployeeId ?? "",
-                        Specialization = Input.Specialization ?? ""
+                        SpecializationId = Input.SpecializationId ?? 1
                     };
                     _context.Instructors.Add(instructor);
                 }

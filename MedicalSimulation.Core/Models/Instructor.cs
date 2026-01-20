@@ -9,8 +9,9 @@ public class Instructor
     public required string Email { get; set; }
     public required string PhoneNumber { get; set; }
     public required string EmployeeId { get; set; }
-    public required string Specialization { get; set; }
+    public int SpecializationId { get; set; }
 
-    // Navigation property
+    // Navigation properties
     public virtual ApplicationUser? ApplicationUser { get; set; }
+    public virtual InstructorSpecialization? Specialization { get; set; }
 }

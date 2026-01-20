@@ -2,12 +2,14 @@
 
 @{
     ViewData["Title"] = "Instructor Dashboard";
+    var students = ViewBag.Students as List<MedicalSimulation.Core.Models.Student> ?? new List<MedicalSimulation.Core.Models.Student>();
+    var feedbacks = ViewBag.Feedbacks as List<MedicalSimulation.Core.Models.Feedback> ?? new List<MedicalSimulation.Core.Models.Feedback>();
 }
 
 <div class="row mb-4">
     <div class="col">
         <h1 class="display-4">Instructor Dashboard</h1>
-        <p class="lead">Monitor student performance and simulation attempts.</p>
+        <p class="lead">Monitor student performance and provide feedback.</p>
     </div>
 </div>
 
@@ -27,19 +29,30 @@
                             <th>Simulation</th>
                             <th>Score</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var attempt in Model)
                         {
+                            var student = students.FirstOrDefault(s => s.ApplicationUserId == attempt.UserId);
+                            var feedback = feedbacks.FirstOrDefault(f => f.UserProgressId == attempt.Id);
                             <tr>
                                 <td>@attempt.StartedAt.ToLocalTime().ToString("g")</td>
                                 <td>
                                     @if (attempt.User != null)
                                     {
-                                        <span>@attempt.User.FirstName @attempt.User.LastName</span>
+                                        <span><strong>@attempt.User.FirstName @attempt.User.LastName</strong></span>
                                         <br />
                                         <small class="text-muted">@attempt.User.Email</small>
+                                        @if (student != null)
+                                        {
+                                            <br />
+                                            <small class="text-info">
+                                                <i class="fas fa-id-card"></i> @student.StudentId | 
+                                                <i class="fas fa-graduation-cap"></i> Year @student.YearLevel
+                                            </small>
+                                        }
                                     }
                                     else
                                     {
@@ -62,7 +75,64 @@
                                         <span class="text-secondary"><i class="fas fa-spinner"></i> In Progress</span>
                                     }
                                 </td>
+                                <td>
+                                    @if (feedback != null)
+                                    {
+                                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#feedbackModal@(attempt.Id)">
+                                            <i class="fas fa-edit"></i> Edit Feedback
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#feedbackModal@(attempt.Id)">
+                                            <i class="fas fa-comment"></i> Give Feedback
+                                        </button>
+                                    }
+                                </td>
                             </tr>
+                            @if (feedback != null)
+                            {
+                                <tr>
+                                    <td colspan="6" style="background-color: #f8f9fa; border-left: 3px solid #17a2b8;">
+                                        <strong><i class="fas fa-comment-dots"></i> Your Feedback:</strong> @feedback.FeedbackText
+                                        <br />
+                                        <small class="text-muted">Given on @feedback.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</small>
+                                    </td>
+                                </tr>
+                            }
+
+                            <!-- Feedback Modal -->
+                            <div class="modal fade" id="feedbackModal@(attempt.Id)" tabindex="-1" aria-labelledby="feedbackModalLabel@(attempt.Id)" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form asp-action="GiveFeedback" method="post">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="feedbackModalLabel@(attempt.Id)">
+                                                    @(feedback != null ? "Edit" : "Give") Feedback for @attempt.User?.FirstName @attempt.User?.LastName
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <input type="hidden" name="userProgressId" value="@attempt.Id" />
+                                                <div class="mb-3">
+                                                    <label for="feedbackText@(attempt.Id)" class="form-label">Feedback</label>
+                                                    <textarea class="form-control" id="feedbackText@(attempt.Id)" name="feedbackText" rows="4" required>@(feedback?.FeedbackText)</textarea>
+                                                </div>
+                                                <div class="alert alert-info">
+                                                    <strong>Simulation:</strong> @attempt.Simulation?.Title<br />
+                                                    <strong>Score:</strong> @attempt.Score / @attempt.MaxScore
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-save"></i> Save Feedback
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         }
                     </tbody>
                 </table>
