@@ -1,0 +1,91 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="hero-section">
+    <div class="hero-content">
+        <h1 class="hero-title">
+            <i class="fas fa-heartbeat"></i>
+            Medical Simulation Platform
+        </h1>
+        <p class="hero-subtitle">
+            Master surgical procedures through interactive 2D simulations
+        </p>
+        
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="hero-actions">
+                <a asp-controller="Specialties" asp-action="Index" class="btn btn-primary btn-lg">
+                    <i class="fas fa-play-circle"></i> Start Training
+                </a>
+                <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline btn-lg">
+                    <i class="fas fa-chart-line"></i> View Progress
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="hero-actions">
+                <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary btn-lg">
+                    <i class="fas fa-user-plus"></i> Get Started
+                </a>
+                <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline btn-lg">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@if (User.Identity?.IsAuthenticated == true && ViewBag.Specialties != null)
+{
+    <div class="specialties-preview">
+        <h2 class="section-title">Available Specialties</h2>
+        <div class="specialty-grid">
+            @foreach (var specialty in ViewBag.Specialties)
+            {
+                <a asp-controller="Specialties" asp-action="Details" asp-route-id="@specialty.Id" class="specialty-card" style="border-color: @specialty.Color">
+                    <div class="specialty-icon" style="color: @specialty.Color">
+                        <i class="fas @specialty.IconClass"></i>
+                    </div>
+                    <h3>@specialty.Name</h3>
+                    <p>@specialty.Description</p>
+                </a>
+            }
+        </div>
+    </div>
+}
+
+<div class="features-section">
+    <h2 class="section-title">Why Choose MedSim?</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h3>Learn by Doing</h3>
+            <p>Practice surgical procedures in a safe, interactive environment</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <h3>Track Progress</h3>
+            <p>Monitor your improvement with detailed performance analytics</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3>Expert Designed</h3>
+            <p>Simulations created by experienced medical professionals</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <h3>Learn Anytime</h3>
+            <p>Access training materials 24/7 from anywhere</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Coordinate Picker - MedSim</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        code Code body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            color: #333;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .page-header p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+        }
+
+        /* Replicate actual simulation layout */
+        .simulation-layout {
+            display: flex;
+            height: calc(100vh - 80px);
+            width: 100vw;
+        }
+
+        /* Left sidebar - exactly like the real simulation */
+        .simulation-sidebar {
+            width: 350px;
+            background: #16213e;
+            color: white;
+            padding: 1.5rem;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-section h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: #60a5fa;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+        }
+
+        .control-group input[type="file"],
+        .control-group input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: border-color 0.3s;
+        }
+
+        .control-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        /* Right container - exactly like the real simulation */
+        .simulation-canvas-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            overflow: hidden;
+        }
+
+        #videoWrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #videoPlayer {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            border-radius: 0.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        #clickOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .video-control-btn {
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px solid rgba(59, 130, 246, 0.5);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .video-control-btn:hover {
+            background: rgba(59, 130, 246, 0.4);
+            border-color: #3b82f6;
+        }
+
+        .coordinates-display {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .coord-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .coord-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .coord-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .coord-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .coord-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .coord-value {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            color: #333;
+            background: #f0f0f0;
+            padding: 8px;
+            border-radius: 5px;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 10px;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .instructions h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: #856404;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .history {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+
+        .history h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #28a745;
+        }
+
+        .clear-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .clear-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page-header">
+        <h1>🎯 Video Coordinate Picker</h1>
+        <p>Replicate your simulation layout - Click on the video to get exact coordinates</p>
+    </div>
+    <div class="simulation-layout">
+        <!-- Left Sidebar - Matches real simulation -->
+        <div class="simulation-sidebar">
+            <div class="info-box">
+                <strong>📋 Instructions:</strong><br>
+                1. Load your video file<br>
+                2. Play to the exact frame<br>
+                3. Click on the video<br>
+                4. Copy the JSON coordinates
+            </div>
+
+            <div class="sidebar-section">
+                <h3>📹 Video File</h3>
+                <div class="control-group">
+                    <label for="videoFile">Select Video:</label>
+                    <input type="file" id="videoFile" accept="video/*">
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>🏷️ Point Label</h3>
+                <div class="control-group">
+                    <label for="pointLabel">Label (optional):</label>
+                    <input type="text" id="pointLabel" placeholder="e.g., 'Scalpel position'">
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>⏱️ Video Controls</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="video-control-btn" onclick="togglePlayPause()">⏯️ Play/Pause</button>
+                    <button class="video-control-btn" onclick="stepBackward()">⏪ -1s</button>
+                    <button class="video-control-btn" onclick="stepForward()">⏩ +1s</button>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <span id="currentTime"
+                            style="font-family: 'Courier New', monospace; font-size: 1.2rem; color: #60a5fa;">00:00.000</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section" id="coordsDisplay" style="display: none;">
+                <h3>📍 Last Click</h3>
+                <div style="font-size: 0.85rem; line-height: 1.6;">
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #60a5fa;">Percentage:</strong><br>
+                        <span id="percentCoords" style="font-family: 'Courier New', monospace;">-</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong style="color: #60a5fa;">Time:</strong><br>
+                        <span id="timeCoords" style="font-family: 'Courier New', monospace;">-</span>
+                    </div>
+                    <div>
+                        <strong style="color: #60a5fa;">JSON:</strong><br>
+                        <textarea id="jsonCoords" readonly
+                            style="width: 100%; height: 120px; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 5px; padding: 8px; font-family: 'Courier New', monospace; font-size: 0.75rem; resize: none;"></textarea>
+                        <button class="copy-btn" onclick="copyJSON()">📋 Copy JSON</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <button class="clear-btn" onclick="clearMarkers()" style="width: 100%;">✖️ Clear All Markers</button>
+            </div>
+        </div>
+
+        <!-- Right Container - Video Display (Matches real simulation) -->
+        <div class="simulation-canvas-container">
+            <div id="videoWrapper">
+                <video id="videoPlayer"></video>
+                <canvas id="clickOverlay"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const videoPlayer = document.getElementById('videoPlayer');
+        const videoFile = document.getElementById('videoFile');
+        const videoWrapper = document.getElementById('videoWrapper');
+        const clickOverlay = document.getElementById('clickOverlay');
+        const ctx = clickOverlay.getContext('2d');
+        const coordsDisplay = document.getElementById('coordsDisplay');
+        const pointLabel = document.getElementById('pointLabel');
+        const currentTimeDisplay = document.getElementById('currentTime');
+
+        let markers = [];
+
+        // Load video file
+        videoFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                videoPlayer.src = url;
+                videoPlayer.load();
+                // Reset markers when loading new video
+                markers = [];
+                ctx.clearRect(0, 0, clickOverlay.width, clickOverlay.height);
+            }
+        });
+
+        // Update canvas size when video loads
+        videoPlayer.addEventListener('loadedmetadata', () => {
+            resizeCanvas();
+        });
+
+        // Resize canvas to match video exactly
+        function resizeCanvas() {
+            if (!videoPlayer.videoWidth) return;
+
+            const rect = videoPlayer.getBoundingClientRect();
+            const wrapperRect = videoWrapper.getBoundingClientRect();
+
+            // Set internal resolution matches display size
+            clickOverlay.width = rect.width;
+            clickOverlay.height = rect.height;
+
+            // Position canvas exactly over the video
+            clickOverlay.style.left = (rect.left - wrapperRect.left) + 'px';
+            clickOverlay.style.top = (rect.top - wrapperRect.top) + 'px';
+
+            // Ensure visual dimensions match
+            clickOverlay.style.width = rect.width + 'px';
+            clickOverlay.style.height = rect.height + 'px';
+
+            redrawMarkers();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // Update time display
+        videoPlayer.addEventListener('timeupdate', () => {
+            const time = videoPlayer.currentTime;
+            const minutes = Math.floor(time / 60);
+            const seconds = Math.floor(time % 60);
+            const milliseconds = Math.floor((time % 1) * 1000);
+            currentTimeDisplay.textContent =
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
+        });
+
+        // Handle clicks on video
+        videoWrapper.addEventListener('click', (e) => {
+            if (!videoPlayer.src) {
+                alert('Please load a video first!');
+                return;
+            }
+
+            const rect = videoPlayer.getBoundingClientRect();
+
+            // Calculate Click relative to the Video element
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // IGNORE clicks outside the actual video content (e.g. on the black bars of the wrapper)
+            if (x < 0 || x > rect.width || y < 0 || y > rect.height) {
+                return;
+            }
+
+            // Calculate percentages
+            const xPercent = (x / rect.width * 100).toFixed(2);
+            const yPercent = (y / rect.height * 100).toFixed(2);
+
+            // Get video intrinsic dimensions
+            const videoWidth = videoPlayer.videoWidth;
+            const videoHeight = videoPlayer.videoHeight;
+
+            // Calculate pixel coordinates on actual video source
+            const xPixel = Math.round((x / rect.width) * videoWidth);
+            const yPixel = Math.round((y / rect.height) * videoHeight);
+
+            // Get current time
+            const currentTime = videoPlayer.currentTime.toFixed(3);
+
+            // Create coordinate object
+            const coords = {
+                percentX: xPercent,
+                percentY: yPercent,
+                pixelX: xPixel,
+                pixelY: yPixel,
+                displayX: x,
+                displayY: y,
+                time: currentTime,
+                label: pointLabel.value || `Point ${markers.length + 1}`,
+                timestamp: new Date().toLocaleTimeString()
+            };
+
+            // Add marker using the calculated X/Y
+            addMarker(x, y);
+
+            // Update display
+            updateCoordinatesDisplay(coords);
+
+            // Clear label input
+            pointLabel.value = '';
+
+            // Show sections
+            coordsDisplay.style.display = 'block';
+        });
+
+        function addMarker(x, y) {
+            markers.push({ x, y });
+            redrawMarkers();
+        }
+
+        function redrawMarkers() {
+            // Clear entire canvas
+            ctx.clearRect(0, 0, clickOverlay.width, clickOverlay.height);
+
+            markers.forEach(marker => {
+                ctx.beginPath();
+                // FIXED: We draw directly at marker.x/y. 
+                // We do NOT subtract offsets because the canvas is already physically offset via CSS.
+                ctx.arc(marker.x, marker.y, 8, 0, 2 * Math.PI);
+
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.6)';
+                ctx.fill();
+
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+        }
+
+        function updateCoordinatesDisplay(coords) {
+            document.getElementById('percentCoords').textContent =
+                `X: ${coords.percentX}%, Y: ${coords.percentY}%`;
+
+            document.getElementById('timeCoords').textContent =
+                `${coords.time}s`;
+
+            const jsonData = {
+                x: parseFloat(coords.percentX),
+                y: parseFloat(coords.percentY),
+                radius: 5.0,
+                pauseTime: parseFloat(coords.time),
+                label: coords.label
+            };
+
+            document.getElementById('jsonCoords').value =
+                JSON.stringify(jsonData, null, 2);
+        }
+
+        function copyJSON() {
+            const jsonText = document.getElementById('jsonCoords').value;
+            navigator.clipboard.writeText(jsonText).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => btn.textContent = originalText, 1500);
+            });
+        }
+
+        function clearMarkers() {
+            if (markers.length > 0 && confirm('Clear all markers?')) {
+                markers = [];
+                ctx.clearRect(0, 0, clickOverlay.width, clickOverlay.height);
+            }
+        }
+
+        function togglePlayPause() {
+            if (videoPlayer.paused) {
+                videoPlayer.play();
+            } else {
+                videoPlayer.pause();
+            }
+        }
+
+        function stepForward() {
+            videoPlayer.currentTime += 1;
+        }
+
+        function stepBackward() {
+            videoPlayer.currentTime -= 1;
+        }
+    </script>

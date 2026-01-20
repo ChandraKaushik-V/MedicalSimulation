@@ -1,0 +1,233 @@
+@model MedicalSimulation.Core.Models.UserProgress
+
+@{
+    ViewData["Title"] = "Simulation Results";
+}
+
+<style>
+    .results-page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+
+    .results-card {
+        background: white;
+        border-radius: 2rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .results-header-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 3rem 2rem;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .results-header-section::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
+    }
+
+    .score-circle {
+        width: 150px;
+        height: 150px;
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+        margin: 0 auto 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 4px solid rgba(255,255,255,0.3);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s backwards;
+    }
+
+    .score-value {
+        font-size: 3rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .score-label {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .feedback-message {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        animation: fadeIn 0.5s ease-out 0.6s backwards;
+    }
+
+    .feedback-sub {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        animation: fadeIn 0.5s ease-out 0.8s backwards;
+    }
+
+    .results-body {
+        padding: 3rem;
+    }
+
+    .simulation-title {
+        text-align: center;
+        margin-bottom: 3rem;
+        color: #1f2937;
+    }
+
+    .simulation-title h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .simulation-title p {
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1.5rem;
+        background: #f9fafb;
+        border-radius: 1rem;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-5px);
+        background: #f3f4f6;
+    }
+
+    .stat-item i {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .stat-detail-value {
+        display: block;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-detail-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .btn-lg {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+    }
+
+    @@keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.8); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+</style>
+
+<div class="results-page">
+    <div class="results-card">
+        <div class="results-header-section">
+            <div class="score-circle">
+                <span class="score-value">@Model.Score</span>
+                <span class="score-label">Points</span>
+            </div>
+            
+            @if (Model.Score >= 80)
+            {
+                <h1 class="feedback-message">Excellent Work! <i class="fas fa-star" style="color: #fbbf24;"></i></h1>
+                <p class="feedback-sub">You've mastered this procedure.</p>
+            }
+            else if (Model.Score >= 60)
+            {
+                <h1 class="feedback-message">Good Job! <i class="fas fa-thumbs-up" style="color: #60a5fa;"></i></h1>
+                <p class="feedback-sub">You're making great progress.</p>
+            }
+            else
+            {
+                <h1 class="feedback-message">Keep Practicing <i class="fas fa-clipboard-check" style="color: #9ca3af;"></i></h1>
+                <p class="feedback-sub">Review the steps and try again.</p>
+            }
+        </div>
+
+        <div class="results-body">
+            <div class="simulation-title">
+                <h2>@Model.Simulation?.Title</h2>
+                <p><i class="fas fa-stethoscope"></i> @Model.Simulation?.Specialty?.Name</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <i class="fas fa-bullseye"></i>
+                    <div>
+                        <span class="stat-detail-value">@((Model.Score * 100 / Model.MaxScore))%</span>
+                        <span class="stat-detail-label">Accuracy</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-stopwatch"></i>
+                    <div>
+                        <span class="stat-detail-value">@Model.TimeSpent.ToString(@"mm\:ss")</span>
+                        <span class="stat-detail-label">Time</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-history"></i>
+                    <div>
+                        <span class="stat-detail-value">#@Model.AttemptNumber</span>
+                        <span class="stat-detail-label">Attempt</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a asp-action="Start" asp-route-id="@Model.SimulationId" class="btn btn-primary btn-lg">
+                    <i class="fas fa-redo"></i> Try Again
+                </a>
+                <a asp-controller="Specialties" asp-action="Details" asp-route-id="@Model.Simulation?.SpecialtyId" class="btn btn-outline btn-lg">
+                    <i class="fas fa-list"></i> More Simulations
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

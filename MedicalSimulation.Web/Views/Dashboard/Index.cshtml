@@ -1,0 +1,97 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    var completedSimulations = ViewBag.CompletedSimulations ?? 0;
+    var totalAttempts = ViewBag.TotalAttempts ?? 0;
+    var averageScore = ViewBag.AverageScore ?? 0;
+    var recentProgress = ViewBag.RecentProgress as List<MedicalSimulation.Core.Models.UserProgress> ?? new List<MedicalSimulation.Core.Models.UserProgress>();
+}
+
+<div class="page-header">
+    <h1>
+        <i class="fas fa-chart-line"></i>
+        Your Dashboard
+    </h1>
+    <p>Track your learning progress</p>
+</div>
+
+<div class="dashboard-stats">
+    <div class="stat-card-large">
+        <div class="stat-icon-large">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content-large">
+            <span class="stat-value-large">@completedSimulations</span>
+            <span class="stat-label-large">Completed Simulations</span>
+        </div>
+    </div>
+
+    <div class="stat-card-large">
+        <div class="stat-icon-large">
+            <i class="fas fa-redo-alt"></i>
+        </div>
+        <div class="stat-content-large">
+            <span class="stat-value-large">@totalAttempts</span>
+            <span class="stat-label-large">Total Attempts</span>
+        </div>
+    </div>
+
+    <div class="stat-card-large">
+        <div class="stat-icon-large">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="stat-content-large">
+            <span class="stat-value-large">@averageScore.ToString("F1")</span>
+            <span class="stat-label-large">Average Score</span>
+        </div>
+    </div>
+</div>
+
+@if (recentProgress.Any())
+{
+    <div class="recent-activity">
+        <h2>Recent Activity</h2>
+        <div class="activity-list">
+            @foreach (var progress in recentProgress)
+            {
+                <div class="activity-item">
+                    <div class="activity-icon" style="color: @progress.Simulation?.Specialty?.Color">
+                        <i class="fas @progress.Simulation?.Specialty?.IconClass"></i>
+                    </div>
+                    <div class="activity-content">
+                        <h4>@progress.Simulation?.Title</h4>
+                        <p class="activity-meta">
+                            <span>@progress.Simulation?.Specialty?.Name</span>
+                            <span>•</span>
+                            <span>@progress.StartedAt.ToString("MMM dd, yyyy")</span>
+                        </p>
+                    </div>
+                    <div class="activity-score">
+                        @if (progress.IsCompleted)
+                        {
+                            <span class="score-badge score-@(progress.Score >= 80 ? "excellent" : progress.Score >= 60 ? "good" : "needs-work")">
+                                @progress.Score / @progress.MaxScore
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="score-badge score-incomplete">
+                                In Progress
+                            </span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <i class="fas fa-clipboard-list"></i>
+        <h3>No Activity Yet</h3>
+        <p>Start a simulation to see your progress here</p>
+        <a asp-controller="Specialties" asp-action="Index" class="btn btn-primary">
+            <i class="fas fa-play"></i> Browse Simulations
+        </a>
+    </div>
+}

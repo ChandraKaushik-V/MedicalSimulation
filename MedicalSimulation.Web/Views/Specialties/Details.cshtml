@@ -1,0 +1,68 @@
+@model MedicalSimulation.Core.Models.Specialty
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="page-header">
+    <a asp-action="Index" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Specialties
+    </a>
+    <h1 style="color: @Model.Color">
+        <i class="fas @Model.IconClass"></i>
+        @Model.Name
+    </h1>
+    <p>@Model.Description</p>
+</div>
+
+@if (Model.Simulations.Any())
+{
+    <div class="simulations-grid">
+        @foreach (var simulation in Model.Simulations.OrderBy(s => s.Difficulty))
+        {
+            <div class="simulation-card">
+                <div class="simulation-header">
+                    @if (!string.IsNullOrEmpty(simulation.ThumbnailUrl))
+                    {
+                        <div class="simulation-thumbnail" style="background-image: url('@simulation.ThumbnailUrl')"></div>
+                    }
+                    else
+                    {
+                        <div class="simulation-thumbnail simulation-thumbnail-placeholder">
+                            <i class="fas fa-scissors"></i>
+                        </div>
+                    }
+                    <span class="difficulty-badge difficulty-@simulation.Difficulty.ToString().ToLower()">
+                        @simulation.Difficulty
+                    </span>
+                </div>
+                <div class="simulation-body">
+                    <h3>@simulation.Title</h3>
+                    <p>@simulation.Description</p>
+                    <div class="simulation-meta">
+                        <span>
+                            <i class="fas fa-clock"></i>
+                            @simulation.EstimatedMinutes min
+                        </span>
+                        <span>
+                            <i class="fas fa-desktop"></i>
+                            @simulation.TotalStates states
+                        </span>
+                    </div>
+                </div>
+                <div class="simulation-footer">
+                    <a asp-controller="Simulations" asp-action="Details" asp-route-id="@simulation.Id" class="btn btn-primary">
+                        <i class="fas fa-info-circle"></i> View Details
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <p>No simulations available for this specialty yet.</p>
+    </div>
+}

@@ -1,0 +1,41 @@
+@model IEnumerable<MedicalSimulation.Core.Models.Specialty>
+
+@{
+    ViewData["Title"] = "Medical Specialties";
+}
+
+<div class="page-header">
+    <h1>
+        <i class="fas fa-stethoscope"></i>
+        Medical Specialties
+    </h1>
+    <p>Choose a specialty to begin your training</p>
+</div>
+
+<div class="specialty-grid">
+    @foreach (var specialty in Model)
+    {
+        <a asp-action="Details" asp-route-id="@specialty.Id" class="specialty-card-large" style="border-color: @specialty.Color">
+            <div class="specialty-header" style="background: linear-gradient(135deg, @specialty.Color, @specialty.Color + '99')">
+                <div class="specialty-icon-large">
+                    <i class="fas @specialty.IconClass"></i>
+                </div>
+            </div>
+            <div class="specialty-body">
+                <h2>@specialty.Name</h2>
+                <p>@specialty.Description</p>
+                <div class="specialty-meta">
+                    <span class="badge">
+                        <i class="fas fa-laptop-medical"></i>
+                        @specialty.Simulations.Count Simulations
+                    </span>
+                </div>
+            </div>
+            <div class="specialty-footer">
+                <span class="btn-link">
+                    Explore <i class="fas fa-arrow-right"></i>
+                </span>
+            </div>
+        </a>
+    }
+</div>

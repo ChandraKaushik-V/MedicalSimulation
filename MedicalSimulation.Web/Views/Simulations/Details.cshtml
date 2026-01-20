@@ -1,0 +1,256 @@
+@model MedicalSimulation.Core.Models.Simulation
+
+@{
+    ViewData["Title"] = Model.Title;
+    var bestScore = ViewBag.BestScore ?? 0;
+    var attempts = ViewBag.Attempts ?? 0;
+}
+
+<style>
+    .simulation-details {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .simulation-info {
+        background: white;
+        border-radius: 1.5rem;
+        padding: 0;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+    }
+
+    .simulation-thumbnail-large {
+        width: 100%;
+        height: 350px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .simulation-thumbnail-large::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .simulation-thumbnail-large img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .thumbnail-placeholder {
+        font-size: 8rem;
+        color: white;
+        filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+        position: relative;
+        z-index: 1;
+    }
+
+    .simulation-info h1 {
+        font-size: 2.5rem;
+        margin: 2rem 2.5rem 1rem 2.5rem;
+        font-weight: 800;
+        color: #1f2937;
+    }
+
+    .lead {
+        font-size: 1.25rem;
+        color: #6b7280;
+        margin: 0 2.5rem 2rem 2.5rem;
+        line-height: 1.7;
+    }
+
+    .simulation-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin: 0 2.5rem 2rem 2.5rem;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 1.75rem;
+        background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+        border-radius: 1rem;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border-color: rgba(102, 126, 234, 0.2);
+    }
+
+    .stat-card i {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-card > div {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-value {
+        font-size: 1.375rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .difficulty-beginner {
+        color: #10b981;
+    }
+
+    .difficulty-intermediate {
+        color: #f59e0b;
+    }
+
+    .difficulty-advanced {
+        color: #ef4444;
+    }
+
+    .difficulty-expert {
+        color: #7c3aed;
+    }
+
+    .user-progress-summary {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border-radius: 1rem;
+        padding: 2rem;
+        margin: 0 2.5rem 2rem 2.5rem;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .user-progress-summary h3 {
+        margin-bottom: 1.5rem;
+        color: #667eea;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .progress-stats {
+        display: flex;
+        gap: 3rem;
+        flex-wrap: wrap;
+    }
+
+    .progress-stat {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .progress-label {
+        font-size: 0.9375rem;
+        color: #6b7280;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-value {
+        font-size: 2.25rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1.25rem;
+        flex-wrap: wrap;
+        padding: 0 2.5rem 2.5rem 2.5rem;
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+</style>
+
+<div class="page-header">
+    <a asp-controller="Specialties" asp-action="Details" asp-route-id="@Model.SpecialtyId" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to @Model.Specialty?.Name
+    </a>
+</div>
+
+<div class="simulation-details">
+    <div class="simulation-info">
+        <div class="simulation-thumbnail-large">
+            @if (!string.IsNullOrEmpty(Model.ThumbnailUrl))
+            {
+                <img src="@Model.ThumbnailUrl" alt="@Model.Title" />
+            }
+            else
+            {
+                <div class="thumbnail-placeholder">
+                    <i class="fas fa-scissors"></i>
+                </div>
+            }
+        </div>
+        
+        <h1>@Model.Title</h1>
+        <p class="lead">@Model.Description</p>
+        
+        <div class="simulation-stats">
+            <div class="stat-card">
+                <i class="fas fa-clock"></i>
+                <div>
+                    <span class="stat-label">Duration</span>
+                    <span class="stat-value">@Model.EstimatedMinutes min</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-layer-group"></i>
+                <div>
+                    <span class="stat-label">States</span>
+                    <span class="stat-value">@Model.TotalStates steps</span>
+                </div>
+            </div>
+        </div>
+
+            <div class="user-progress-summary">
+                <h3><i class="fas fa-chart-line"></i> Your Progress</h3>
+                <div class="progress-stats">
+                    <div class="progress-stat">
+                        <span class="progress-label">Best Score</span>
+                        <span class="progress-value">@bestScore / @(Model.TotalStates * 20)</span>
+                    </div>
+                    <div class="progress-stat">
+                        <span class="progress-label">Attempts</span>
+                        <span class="progress-value">@attempts</span>
+                    </div>
+                </div>
+            </div>
+
+        <div class="action-buttons">
+            <a asp-action="Start" asp-route-id="@Model.Id" class="btn btn-primary btn-lg">
+                <i class="fas fa-play"></i> Start Simulation
+            </a>
+        </div>
+    </div>
+</div>
