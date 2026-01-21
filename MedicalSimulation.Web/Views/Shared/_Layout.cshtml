@@ -21,11 +21,6 @@
                     <ul class="navbar-nav">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Specialties" asp-action="Index">
-                                    <i class="fas fa-stethoscope"></i> Specialties
-                                </a>
-                            </li>
                             @if (User.IsInRole("Instructor"))
                             {
                                 <li class="nav-item">
@@ -36,6 +31,11 @@
                             }
                             else
                             {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Specialties" asp-action="Index">
+                                        <i class="fas fa-stethoscope"></i> Specialties
+                                    </a>
+                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Dashboard" asp-action="Index">
                                         <i class="fas fa-chart-line"></i> Dashboard

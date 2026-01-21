@@ -17,6 +17,7 @@ public class DashboardController : Controller
         _context = context;
     }
 
+    [Authorize(Roles = "Student")]
     public async Task<IActionResult> Index()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -64,7 +65,7 @@ public class DashboardController : Controller
     }
 
     [Authorize(Roles = "Instructor")]
-    public async Task<IActionResult> InstructorIndex()
+    public async Task<IActionResult> InstructorIndex(string? studentId = null)
     {
         var allProgress = await _context.UserProgress
             .Include(up => up.Simulation)
@@ -83,6 +84,30 @@ public class DashboardController : Controller
         var feedbacks = await _context.Feedbacks
             .Where(f => progressIds.Contains(f.UserProgressId))
             .ToListAsync();
+
+        // If a specific student is selected, filter the progress
+        if (!string.IsNullOrEmpty(studentId))
+        {
+            allProgress = allProgress.Where(up => up.UserId == studentId).ToList();
+            ViewBag.SelectedStudentId = studentId;
+            ViewBag.SelectedStudent = students.FirstOrDefault(s => s.ApplicationUserId == studentId);
+        }
+        else
+        {
+            // Calculate student summary statistics for the student list view
+            var studentSummaries = students.Select(student => new
+            {
+                Student = student,
+                AttemptCount = allProgress.Count(p => p.UserId == student.ApplicationUserId),
+                CompletedCount = allProgress.Count(p => p.UserId == student.ApplicationUserId && p.IsCompleted),
+                AverageScore = allProgress.Where(p => p.UserId == student.ApplicationUserId && p.IsCompleted).Any()
+                    ? allProgress.Where(p => p.UserId == student.ApplicationUserId && p.IsCompleted).Average(p => p.Score)
+                    : 0,
+                PendingFeedback = allProgress.Count(p => p.UserId == student.ApplicationUserId && !feedbacks.Any(f => f.UserProgressId == p.Id))
+            }).OrderByDescending(s => s.AttemptCount).ToList();
+
+            ViewBag.StudentSummaries = studentSummaries;
+        }
 
         ViewBag.Students = students;
         ViewBag.Feedbacks = feedbacks;

@@ -17,6 +17,12 @@ public class HomeController : Controller
     {
         if (User.Identity?.IsAuthenticated == true)
         {
+            // Redirect instructors to their dashboard
+            if (User.IsInRole("Instructor"))
+            {
+                return RedirectToAction("InstructorIndex", "Dashboard");
+            }
+            
             var specialties = await _context.Specialties
                 .Where(s => s.IsActive)
                 .OrderBy(s => s.DisplayOrder)
