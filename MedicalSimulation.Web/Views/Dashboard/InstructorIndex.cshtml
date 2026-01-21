@@ -1,147 +1,470 @@
-@model IEnumerable<MedicalSimulation.Core.Models.UserProgress>
-
+@model List<MedicalSimulation.Core.Models.UserProgress>
 @{
     ViewData["Title"] = "Instructor Dashboard";
-    var students = ViewBag.Students as List<MedicalSimulation.Core.Models.Student> ?? new List<MedicalSimulation.Core.Models.Student>();
-    var feedbacks = ViewBag.Feedbacks as List<MedicalSimulation.Core.Models.Feedback> ?? new List<MedicalSimulation.Core.Models.Feedback>();
+    var students = ViewBag.Students as List<MedicalSimulation.Core.Models.Student>;
+    var feedbacks = ViewBag.Feedbacks as List<MedicalSimulation.Core.Models.Feedback>;
+    var selectedStudentId = ViewBag.SelectedStudentId as string;
+    var selectedStudent = ViewBag.SelectedStudent as MedicalSimulation.Core.Models.Student;
+    var studentSummaries = ViewBag.StudentSummaries as dynamic;
+    
+    var isStudentSelected = !string.IsNullOrEmpty(selectedStudentId);
 }
 
-<div class="row mb-4">
-    <div class="col">
-        <h1 class="display-4">Instructor Dashboard</h1>
-        <p class="lead">Monitor student performance and provide feedback.</p>
-    </div>
-</div>
+<style>
+    .instructor-dashboard {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
 
-<div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0"><i class="fas fa-list"></i> All Student Attempts</h5>
-    </div>
-    <div class="card-body">
-        @if (Model.Any())
-        {
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Student</th>
-                            <th>Simulation</th>
-                            <th>Score</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var attempt in Model)
-                        {
-                            var student = students.FirstOrDefault(s => s.ApplicationUserId == attempt.UserId);
-                            var feedback = feedbacks.FirstOrDefault(f => f.UserProgressId == attempt.Id);
-                            <tr>
-                                <td>@attempt.StartedAt.ToLocalTime().ToString("g")</td>
-                                <td>
-                                    @if (attempt.User != null)
-                                    {
-                                        <span><strong>@attempt.User.FirstName @attempt.User.LastName</strong></span>
-                                        <br />
-                                        <small class="text-muted">@attempt.User.Email</small>
-                                        @if (student != null)
-                                        {
-                                            <br />
-                                            <small class="text-info">
-                                                <i class="fas fa-id-card"></i> @student.StudentId
-                                            </small>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">Unknown User</span>
-                                    }
-                                </td>
-                                <td>@attempt.Simulation?.Title</td>
-                                <td>
-                                    <span class="badge @(attempt.Score >= 80 ? "bg-success" : attempt.Score >= 60 ? "bg-warning" : "bg-danger")">
-                                        @attempt.Score%
-                                    </span>
-                                </td>
-                                <td>
-                                    @if (attempt.IsCompleted)
-                                    {
-                                        <span class="text-success"><i class="fas fa-check-circle"></i> Completed</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-secondary"><i class="fas fa-spinner"></i> In Progress</span>
-                                    }
-                                </td>
-                                <td>
-                                    @if (feedback != null)
-                                    {
-                                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#feedbackModal@(attempt.Id)">
-                                            <i class="fas fa-edit"></i> Edit Feedback
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#feedbackModal@(attempt.Id)">
-                                            <i class="fas fa-comment"></i> Give Feedback
-                                        </button>
-                                    }
-                                </td>
-                            </tr>
-                            @if (feedback != null)
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .student-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.2s;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .student-card:hover {
+        border-color: #6366f1;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .student-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .avatar {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .student-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    .attempt-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+    .attempt-row {
+        padding: 1.25rem;
+        display: grid;
+        grid-template-columns: 1fr 150px 120px;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .sim-info {
+        min-width: 0;
+    }
+
+    .sim-title {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+    }
+
+    .sim-meta {
+        font-size: 0.85rem;
+        color: #64748b;
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .score-display {
+        text-align: center;
+    }
+
+    .score-val {
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: block;
+    }
+
+    .score-label {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    .feedback-toggle {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .feedback-section {
+        background-color: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        padding: 1.5rem;
+    }
+
+    .feedback-form textarea {
+        width: 100%;
+        min-height: 100px;
+        padding: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        resize: vertical;
+    }
+
+    .feedback-form textarea:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .btn-send {
+        background: #6366f1;
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-send:hover {
+        background: #4f46e5;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6366f1;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        transition: gap 0.2s;
+    }
+
+    .back-link:hover {
+        gap: 0.75rem;
+    }
+
+    @@media (max-width: 992px) {
+        .attempt-row {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+    }
+</style>
+
+<div class="instructor-dashboard">
+    
+    @if (isStudentSelected)
+    {
+        <!-- STUDENT DETAIL VIEW -->
+        <a asp-action="InstructorIndex" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to Students
+        </a>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="student-header">
+                    <div class="avatar">
+                        @(selectedStudent?.FirstName?.FirstOrDefault() ?? 'S')
+                    </div>
+                    <div>
+                        <h3 class="mb-1">@selectedStudent?.FirstName @selectedStudent?.LastName</h3>
+                        <div class="text-muted">
+                            <span>Student ID: @selectedStudent?.StudentId</span>
+                            <span class="mx-2">•</span>
+                            <span>@selectedStudent?.Email</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="student-stats">
+                    <div class="stat-item">
+                        <span class="stat-value text-primary">@Model.Count</span>
+                        <span class="stat-label">Total Attempts</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value text-success">@Model.Count(x => x.IsCompleted)</span>
+                        <span class="stat-label">Completed</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value text-warning">@Model.Count(x => !(feedbacks?.Any(f => f.UserProgressId == x.Id) ?? false))</span>
+                        <span class="stat-label">Pending Feedback</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value text-info">
+                            @if (Model.Any(x => x.IsCompleted))
                             {
-                                <tr>
-                                    <td colspan="6" style="background-color: #f8f9fa; border-left: 3px solid #17a2b8;">
-                                        <strong><i class="fas fa-comment-dots"></i> Your Feedback:</strong> @feedback.FeedbackText
-                                        <br />
-                                        <small class="text-muted">Given on @feedback.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</small>
-                                    </td>
-                                </tr>
+                                @Model.Where(x => x.IsCompleted).Average(x => (x.Score / (double)x.MaxScore) * 100).ToString("F0")<text>%</text>
                             }
+                            else
+                            {
+                                <text>N/A</text>
+                            }
+                        </span>
+                        <span class="stat-label">Avg Score</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                            <!-- Feedback Modal -->
-                            <div class="modal fade" id="feedbackModal@(attempt.Id)" tabindex="-1" aria-labelledby="feedbackModalLabel@(attempt.Id)" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <form asp-action="GiveFeedback" method="post">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="feedbackModalLabel@(attempt.Id)">
-                                                    @(feedback != null ? "Edit" : "Give") Feedback for @attempt.User?.FirstName @attempt.User?.LastName
-                                                </h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <input type="hidden" name="userProgressId" value="@attempt.Id" />
-                                                <div class="mb-3">
-                                                    <label for="feedbackText@(attempt.Id)" class="form-label">Feedback</label>
-                                                    <textarea class="form-control" id="feedbackText@(attempt.Id)" name="feedbackText" rows="4" required>@(feedback?.FeedbackText)</textarea>
-                                                </div>
-                                                <div class="alert alert-info">
-                                                    <strong>Simulation:</strong> @attempt.Simulation?.Title<br />
-                                                    <strong>Score:</strong> @attempt.Score / @attempt.MaxScore
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                <button type="submit" class="btn btn-primary">
-                                                    <i class="fas fa-save"></i> Save Feedback
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
+
+        <h5 class="fw-bold mb-3">Simulation Attempts</h5>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 bg-white rounded-3 border">
+                <i class="fas fa-clipboard fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No attempts found for this student.</p>
+            </div>
+        }
+
+        @foreach (var item in Model)
+        {
+            var feedback = feedbacks?.FirstOrDefault(f => f.UserProgressId == item.Id);
+            var scorePercent = item.MaxScore > 0 ? (int)((item.Score / (double)item.MaxScore) * 100) : 0;
+            var scoreColor = scorePercent >= 80 ? "success" : scorePercent >= 60 ? "warning" : "danger";
+            
+            <div class="attempt-card">
+                <div class="attempt-row">
+                    
+                    <div class="sim-info">
+                        <div class="sim-title">@item.Simulation?.Title</div>
+                        <div class="sim-meta">
+                            <span><i class="far fa-calendar me-1"></i>@item.StartedAt.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                            <span>•</span>
+                            <span><i class="far fa-clock me-1"></i>@item.StartedAt.ToLocalTime().ToString("hh:mm tt")</span>
+                            @if (item.IsCompleted) 
+                            { 
+                                <span class="text-success">• Completed</span> 
+                            }
+                            else
+                            {
+                                <span class="text-warning">• In Progress</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="score-display">
+                        <span class="score-val text-@scoreColor">@scorePercent%</span>
+                        <span class="score-label">@item.Score/@item.MaxScore pts</span>
+                    </div>
+
+                    <div>
+                        <button class="feedback-toggle @(feedback != null ? "btn btn-light border" : "btn btn-primary")" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#feedback-@item.Id">
+                            <i class="fas fa-comment me-1"></i>
+                            @(feedback != null ? "Edit" : "Feedback")
+                        </button>
+                    </div>
+                </div>
+
+                <div class="collapse feedback-section" id="feedback-@item.Id">
+                    <form asp-action="GiveFeedback" method="post" class="feedback-form">
+                        <input type="hidden" name="userProgressId" value="@item.Id" />
+                        
+                        @if (feedback != null)
+                        {
+                            <div class="mb-2 small text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Last feedback: @feedback.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")
                             </div>
                         }
-                    </tbody>
-                </table>
+                        
+                        <textarea name="feedbackText" 
+                                  placeholder="Enter your feedback for this attempt..." 
+                                  required>@(feedback?.FeedbackText)</textarea>
+                        
+                        <div class="mt-3 d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-sm btn-light" data-bs-toggle="collapse" data-bs-target="#feedback-@item.Id">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn-send">
+                                <i class="fas fa-paper-plane me-1"></i> Send Feedback
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <!-- STUDENT LIST VIEW -->
+        <div class="mb-4">
+            <h2 class="fw-bold mb-1">Instructor Dashboard</h2>
+            <p class="text-muted">Select a student to view their attempts and provide feedback.</p>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0 fw-bold">@(students?.Count ?? 0)</h3>
+                        <small class="text-muted">Total Students</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-success bg-opacity-10 text-success">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0 fw-bold">@Model.Count</h3>
+                        <small class="text-muted">Total Attempts</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stat-card">
+                    <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0 fw-bold">@Model.Count(x => !(feedbacks?.Any(f => f.UserProgressId == x.Id) ?? false))</h3>
+                        <small class="text-muted">Pending Feedback</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="fw-bold mb-3">Students</h5>
+
+        @if (studentSummaries == null || studentSummaries.Count == 0)
+        {
+            <div class="text-center py-5 bg-white rounded-3 border">
+                <i class="fas fa-user-graduate fa-3x text-muted mb-3"></i>
+                <p class="text-muted">No students found.</p>
             </div>
         }
         else
         {
-            <div class="alert alert-info" role="alert">
-                <i class="fas fa-info-circle"></i> No simulation attempts recorded yet.
-            </div>
+            @foreach (var summary in studentSummaries)
+            {
+                <a asp-action="InstructorIndex" asp-route-studentId="@summary.Student.ApplicationUserId" class="student-card">
+                    <div class="student-header">
+                        <div class="avatar">
+                            @((!string.IsNullOrEmpty(summary.Student.FirstName) ? summary.Student.FirstName[0] : 'S'))
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">@summary.Student.FirstName @summary.Student.LastName</h5>
+                            <div class="small text-muted">
+                                <span>ID: @summary.Student.StudentId</span>
+                                <span class="mx-2">•</span>
+                                <span>@summary.Student.Email</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-muted"></i>
+                    </div>
+
+                    <div class="student-stats">
+                        <div class="stat-item">
+                            <span class="stat-value text-primary">@summary.AttemptCount</span>
+                            <span class="stat-label">Attempts</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value text-success">@summary.CompletedCount</span>
+                            <span class="stat-label">Completed</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value text-warning">@summary.PendingFeedback</span>
+                            <span class="stat-label">Pending</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value text-info">
+                                @if (summary.CompletedCount > 0)
+                                {
+                                    @(((double)summary.AverageScore / (summary.CompletedCount > 0 ? 120 : 1) * 100).ToString("F0"))<text>%</text>
+                                }
+                                else
+                                {
+                                    <text>N/A</text>
+                                }
+                            </span>
+                            <span class="stat-label">Avg Score</span>
+                        </div>
+                    </div>
+                </a>
+            }
         }
-    </div>
+    }
 </div>
+

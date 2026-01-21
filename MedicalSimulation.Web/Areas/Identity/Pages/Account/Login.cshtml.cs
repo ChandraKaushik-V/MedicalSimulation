@@ -70,6 +70,14 @@ public class LoginModel : PageModel
             if (result.Succeeded)
             {
                 _logger.LogInformation("User logged in.");
+                
+                // Redirect instructors to their dashboard
+                var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
+                if (user != null && await _signInManager.UserManager.IsInRoleAsync(user, "Instructor"))
+                {
+                    return RedirectToAction("InstructorIndex", "Dashboard");
+                }
+                
                 return LocalRedirect(returnUrl);
             }
             // if (result.RequiresTwoFactor)
