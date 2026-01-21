@@ -6,6 +6,11 @@ obj/
 *.db
 *.db-shm
 *.db-wal
+
+# Ignore environment-specific settings
+appsettings.json
 appsettings.Development.json
+
+# Frontend libraries
 wwwroot/lib/
 node_modules/
