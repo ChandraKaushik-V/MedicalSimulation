@@ -1,0 +1,370 @@
+@model MedicalSimulation.Core.Models.UserProgress
+
+@{
+    ViewData["Title"] = "Attempt Details";
+    var feedback = ViewBag.Feedback as MedicalSimulation.Core.Models.Feedback;
+    var instructor = ViewBag.Instructor as MedicalSimulation.Core.Models.Instructor;
+    var allAttempts = ViewBag.AllAttempts as List<MedicalSimulation.Core.Models.UserProgress> ?? new List<MedicalSimulation.Core.Models.UserProgress>();
+    var avgScore = ViewBag.AverageScoreForSimulation ?? 0.0;
+    
+    var scorePercentage = (Model.Score / (double)Model.MaxScore) * 100;
+    var timeTaken = Model.CompletedAt.HasValue ? (Model.CompletedAt.Value - Model.StartedAt).TotalMinutes : 0;
+}
+
+<div class="page-header">
+    <a asp-action="Index" class="btn btn-outline-primary mb-3">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+    <h1>
+        <i class="fas fa-chart-bar"></i>
+        Simulation Attempt Details
+    </h1>
+    <p>@Model.Simulation?.Title</p>
+</div>
+
+<!-- Performance Overview Cards -->
+<div class="dashboard-stats">
+    <div class="stat-card-large">
+        <div class="stat-icon-large" style="color: @Model.Simulation?.Specialty?.Color">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="stat-content-large">
+            <span class="stat-value-large">@scorePercentage.ToString("F1")%</span>
+            <span class="stat-label-large">Your Score</span>
+        </div>
+    </div>
+
+    <div class="stat-card-large">
+        <div class="stat-icon-large">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-content-large">
+            <span class="stat-value-large">@timeTaken.ToString("F1")</span>
+            <span class="stat-label-large">Minutes Taken</span>
+        </div>
+    </div>
+
+    <div class="stat-card-large">
+        <div class="stat-icon-large">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-content-large">
+            <span class="stat-value-large">@avgScore.ToString("F1")%</span>
+            <span class="stat-label-large">Your Average</span>
+        </div>
+    </div>
+
+    <div class="stat-card-large">
+        <div class="stat-icon-large">
+            <i class="fas fa-redo-alt"></i>
+        </div>
+        <div class="stat-content-large">
+            <span class="stat-value-large">@allAttempts.Count</span>
+            <span class="stat-label-large">Total Attempts</span>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Details and Charts -->
+<div class="row mt-4">
+    <!-- Attempt Information -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Attempt Information</h5>
+            </div>
+            <div class="card-body p-3">
+                <div class="info-item mb-2">
+                    <div class="info-label">
+                        <i class="fas fa-flask text-primary"></i> Simulation
+                    </div>
+                    <div class="info-value">@Model.Simulation?.Title</div>
+                </div>
+                
+                <div class="info-item mb-2">
+                    <div class="info-label">
+                        <i class="fas fa-stethoscope" style="color: @Model.Simulation?.Specialty?.Color"></i> Specialty
+                    </div>
+                    <div class="info-value">
+                        <span style="color: @Model.Simulation?.Specialty?.Color; font-weight: 600;">
+                            @Model.Simulation?.Specialty?.Name
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="info-item mb-2">
+                    <div class="info-label">
+                        <i class="fas fa-play-circle text-info"></i> Started
+                    </div>
+                    <div class="info-value">@Model.StartedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</div>
+                </div>
+                
+                <div class="info-item mb-2">
+                    <div class="info-label">
+                        <i class="fas fa-check-circle text-success"></i> Completed
+                    </div>
+                    <div class="info-value">
+                        @if (Model.CompletedAt.HasValue)
+                        {
+                            @Model.CompletedAt.Value.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">In Progress</span>
+                        }
+                    </div>
+                </div>
+                
+                <div class="info-item mb-2">
+                    <div class="info-label">
+                        <i class="fas fa-star text-warning"></i> Score
+                    </div>
+                    <div class="info-value">
+                        <span class="badge @(scorePercentage >= 80 ? "bg-success" : scorePercentage >= 60 ? "bg-warning" : "bg-danger") fs-6 px-3 py-2">
+                            @Model.Score / @Model.MaxScore (@scorePercentage.ToString("F1")%)
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-flag text-danger"></i> Status
+                    </div>
+                    <div class="info-value">
+                        @if (Model.IsCompleted)
+                        {
+                            <span class="badge bg-success fs-6 px-2 py-1">
+                                <i class="fas fa-check-circle"></i> Completed
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary fs-6 px-2 py-1">
+                                <i class="fas fa-spinner"></i> In Progress
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Score Breakdown Chart -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Score Breakdown</h5>
+            </div>
+            <div class="card-body p-3" style="height: 350px; display: flex; align-items: center; justify-content: center;">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Chart -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Progress Trend</h5>
+            </div>
+            <div class="card-body p-3" style="height: 350px;">
+                <canvas id="progressChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Instructor Feedback -->
+@if (feedback != null)
+{
+    <div class="card shadow-sm mb-4" style="border-left: 4px solid #007bff;">
+        <div class="card-header" style="background-color: #e7f3ff;">
+            <h5 class="mb-0 text-primary">
+                <i class="fas fa-comment-dots"></i> Instructor Feedback
+            </h5>
+        </div>
+        <div class="card-body">
+            @if (instructor != null)
+            {
+                <p class="mb-2">
+                    <strong>From:</strong> @instructor.FirstName @instructor.LastName
+                    @if (instructor.Specialization != null)
+                    {
+                        <span class="text-muted">(@instructor.Specialization.Name)</span>
+                    }
+                </p>
+            }
+            <p class="mb-2"><strong>Date:</strong> @feedback.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</p>
+            <hr />
+            <p style="font-size: 1.1em; line-height: 1.6;">@feedback.FeedbackText</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No instructor feedback available for this attempt yet.
+    </div>
+}
+
+<style>
+    .info-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        flex: 0 0 130px;
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+    }
+    
+    .info-label i {
+        margin-right: 6px;
+        width: 18px;
+        text-align: center;
+    }
+    
+    .info-value {
+        flex: 1;
+        font-size: 0.95rem;
+        color: #212529;
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Performance Pie Chart
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+        const scorePercentage = @scorePercentage;
+        const remainingPercentage = 100 - scorePercentage;
+        
+        new Chart(performanceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Score Achieved', 'Remaining'],
+                datasets: [{
+                    data: [scorePercentage, remainingPercentage],
+                    backgroundColor: [
+                        scorePercentage >= 80 ? '#28a745' : scorePercentage >= 60 ? '#ffc107' : '#dc3545',
+                        '#e9ecef'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed.toFixed(1) + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Progress Over Time Line Chart
+        const progressCtx = document.getElementById('progressChart').getContext('2d');
+        const allAttempts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            allAttempts.Select((a, index) => new { 
+                attempt = allAttempts.Count - index, 
+                score = (a.Score / (double)a.MaxScore) * 100,
+                date = a.StartedAt.ToString("MMM dd, HH:mm"),
+                rawScore = a.Score,
+                maxScore = a.MaxScore
+            }).Reverse()
+        ));
+
+        const avgScore = @avgScore;
+
+        new Chart(progressCtx, {
+            type: 'line',
+            data: {
+                labels: allAttempts.map((a, idx) => `#${idx + 1} - ${a.date}`),
+                datasets: [{
+                    label: 'Your Score',
+                    data: allAttempts.map(a => a.score),
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    tension: 0.3,
+                    fill: true,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#007bff',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }, {
+                    label: 'Your Average',
+                    data: Array(allAttempts.length).fill(avgScore),
+                    borderColor: '#28a745',
+                    backgroundColor: 'transparent',
+                    borderDash: [5, 5],
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            },
+                            stepSize: 10
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                const idx = context[0].dataIndex;
+                                return `Attempt #${idx + 1}`;
+                            },
+                            label: function(context) {
+                                if (context.datasetIndex === 0) {
+                                    const idx = context.dataIndex;
+                                    return `Score: ${context.parsed.y.toFixed(1)}% (${allAttempts[idx].rawScore}/${allAttempts[idx].maxScore})`;
+                                } else {
+                                    return `Average: ${context.parsed.y.toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}

@@ -80,10 +80,6 @@ public class RegisterModel : PageModel
         [Display(Name = "Student ID")]
         public string? StudentId { get; set; }
 
-        [Display(Name = "Year Level")]
-        [Range(1, 5, ErrorMessage = "Year level must be between 1 and 5")]
-        public int? YearLevel { get; set; }
-
         // Instructor-specific fields
         [Display(Name = "Employee ID")]
         public string? EmployeeId { get; set; }
@@ -152,8 +148,7 @@ public class RegisterModel : PageModel
                         LastName = Input.LastName,
                         Email = Input.Email,
                         PhoneNumber = Input.PhoneNumber,
-                        StudentId = Input.StudentId ?? "",
-                        YearLevel = Input.YearLevel ?? 1
+                        StudentId = Input.StudentId ?? ""
                     };
                     _context.Students.Add(student);
                 }
