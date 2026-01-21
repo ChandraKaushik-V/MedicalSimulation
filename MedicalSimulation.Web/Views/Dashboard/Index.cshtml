@@ -51,55 +51,64 @@
 @if (recentProgress.Any())
 {
     <div class="recent-activity">
-        <h2>Recent Activity</h2>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Recent Activity</h2>
+            <div class="form-group mb-0" style="min-width: 250px;">
+                <select id="simulationFilter" class="form-select simulation-filter-dropdown">
+                    <option value="">All Simulations</option>
+                    @foreach (var sim in recentProgress.Select(p => p.Simulation).DistinctBy(s => s?.Id))
+                    {
+                        @if (sim != null)
+                        {
+                            <option value="@sim.Id">@sim.Title</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
         <div class="activity-list">
             @foreach (var progress in recentProgress)
             {
                 var feedback = feedbacks.FirstOrDefault(f => f.UserProgressId == progress.Id);
-                <div class="activity-item">
-                    <div class="activity-icon" style="color: @progress.Simulation?.Specialty?.Color">
-                        <i class="fas @progress.Simulation?.Specialty?.IconClass"></i>
+                var scorePercentage = (progress.Score / (double)progress.MaxScore) * 100;
+                
+                <a asp-action="AttemptDetail" asp-route-id="@progress.Id" style="text-decoration: none; color: inherit;" data-simulation-id="@progress.SimulationId" class="activity-link">
+                    <div class="activity-item" style="cursor: pointer; transition: all 0.3s;">
+                        <div class="activity-icon" style="color: @progress.Simulation?.Specialty?.Color">
+                            <i class="fas @progress.Simulation?.Specialty?.IconClass"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>@progress.Simulation?.Title</h4>
+                            <p class="activity-meta">
+                                <span>@progress.Simulation?.Specialty?.Name</span>
+                                <span>•</span>
+                                <span>@progress.StartedAt.ToString("MMM dd, yyyy")</span>
+                            </p>
+                            @if (feedback != null)
+                            {
+                                <div class="mt-2">
+                                    <small class="text-primary">
+                                        <i class="fas fa-comment-dots"></i> Feedback available
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                        <div class="activity-score">
+                            @if (progress.IsCompleted)
+                            {
+                                <span class="score-badge score-@(scorePercentage >= 80 ? "excellent" : scorePercentage >= 60 ? "good" : "needs-work")">
+                                    @scorePercentage.ToString("F1")%
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="score-badge score-incomplete">
+                                    In Progress
+                                </span>
+                            }
+                        </div>
                     </div>
-                    <div class="activity-content">
-                        <h4>@progress.Simulation?.Title</h4>
-                        <p class="activity-meta">
-                            <span>@progress.Simulation?.Specialty?.Name</span>
-                            <span>•</span>
-                            <span>@progress.StartedAt.ToString("MMM dd, yyyy")</span>
-                        </p>
-                        @if (feedback != null)
-                        {
-                            var instructor = instructors.FirstOrDefault(i => i.ApplicationUserId == feedback.InstructorId);
-                            <div class="feedback-section" style="margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #007bff; border-radius: 4px;">
-                                <p style="margin: 0; font-weight: 600; color: #007bff;">
-                                    <i class="fas fa-comment-dots"></i> Instructor Feedback
-                                    @if (instructor != null)
-                                    {
-                                        <span style="font-weight: normal; font-size: 0.9em; color: #6c757d;">
-                                            (@instructor.FirstName @instructor.LastName - @instructor.Specialization?.Name)
-                                        </span>
-                                    }
-                                </p>
-                                <p style="margin: 5px 0 0 0; color: #495057;">@feedback.FeedbackText</p>
-                                <small class="text-muted">@feedback.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</small>
-                            </div>
-                        }
-                    </div>
-                    <div class="activity-score">
-                        @if (progress.IsCompleted)
-                        {
-                            <span class="score-badge score-@(progress.Score >= 80 ? "excellent" : progress.Score >= 60 ? "good" : "needs-work")">
-                                @progress.Score / @progress.MaxScore
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="score-badge score-incomplete">
-                                In Progress
-                            </span>
-                        }
-                    </div>
-                </div>
+                </a>
             }
         </div>
     </div>
@@ -114,4 +123,45 @@ else
             <i class="fas fa-play"></i> Browse Simulations
         </a>
     </div>
+}
+
+@section Scripts {
+    <style>
+        .simulation-filter-dropdown {
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-weight: 500;
+            background-color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.1);
+        }
+        
+        .simulation-filter-dropdown:focus {
+            border-color: #0056b3;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+        
+        .simulation-filter-dropdown:hover {
+            border-color: #0056b3;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.15);
+        }
+    </style>
+    <script>
+        document.getElementById('simulationFilter')?.addEventListener('change', function() {
+            const selectedSimId = this.value;
+            const activityLinks = document.querySelectorAll('.activity-link');
+            
+            activityLinks.forEach(link => {
+                const simId = link.getAttribute('data-simulation-id');
+                
+                if (selectedSimId === '' || simId === selectedSimId) {
+                    link.style.display = 'block';
+                } else {
+                    link.style.display = 'none';
+                }
+            });
+        });
+    </script>
 }

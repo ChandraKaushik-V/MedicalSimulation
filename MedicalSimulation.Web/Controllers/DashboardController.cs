@@ -48,7 +48,10 @@ public class DashboardController : Controller
             .Count();
 
         var totalAttempts = userProgress.Count;
-        var averageScore = userProgress.Any() ? userProgress.Average(up => up.Score) : 0;
+        // Convert score from base 120 to base 100
+        var averageScore = userProgress.Any() 
+            ? userProgress.Average(up => (up.Score / (double)up.MaxScore) * 100) 
+            : 0;
 
         ViewBag.CompletedSimulations = completedSimulations;
         ViewBag.TotalAttempts = totalAttempts;
@@ -129,5 +132,53 @@ public class DashboardController : Controller
         await _context.SaveChangesAsync();
 
         return RedirectToAction(nameof(InstructorIndex));
+    }
+
+    public async Task<IActionResult> AttemptDetail(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var attempt = await _context.UserProgress
+            .Include(up => up.Simulation)
+            .ThenInclude(s => s!.Specialty)
+            .Include(up => up.User)
+            .FirstOrDefaultAsync(up => up.Id == id && up.UserId == userId);
+
+        if (attempt == null)
+        {
+            return NotFound();
+        }
+
+        // Get feedback for this attempt
+        var feedback = await _context.Feedbacks
+            .Include(f => f.Instructor)
+            .FirstOrDefaultAsync(f => f.UserProgressId == id);
+
+        // Get instructor details if feedback exists
+        Instructor? instructor = null;
+        if (feedback != null)
+        {
+            instructor = await _context.Instructors
+                .Include(i => i.Specialization)
+                .FirstOrDefaultAsync(i => i.ApplicationUserId == feedback.InstructorId);
+        }
+
+        // Get all attempts for this simulation by this user for comparison
+        var allAttemptsForSimulation = await _context.UserProgress
+            .Where(up => up.UserId == userId && up.SimulationId == attempt.SimulationId)
+            .OrderByDescending(up => up.StartedAt)
+            .ToListAsync();
+
+        // Calculate metrics
+        var avgScoreForSimulation = allAttemptsForSimulation.Any()
+            ? allAttemptsForSimulation.Average(up => (up.Score / (double)up.MaxScore) * 100)
+            : 0;
+
+        ViewBag.Feedback = feedback;
+        ViewBag.Instructor = instructor;
+        ViewBag.AllAttempts = allAttemptsForSimulation;
+        ViewBag.AverageScoreForSimulation = avgScoreForSimulation;
+
+        return View(attempt);
     }
 }
