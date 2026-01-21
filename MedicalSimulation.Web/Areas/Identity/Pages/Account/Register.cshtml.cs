@@ -154,6 +154,16 @@ public class RegisterModel : PageModel
                 }
                 else if (Input.Role == "Instructor")
                 {
+                    // Validate Employee ID
+                    var validEmployeeId = await _context.ValidInstructorEmployeeIds
+                        .FirstOrDefaultAsync(v => v.EmployeeId == Input.EmployeeId && v.IsActive);
+
+                    if (validEmployeeId == null)
+                    {
+                        ModelState.AddModelError("Input.EmployeeId", "Employee ID not found or inactive. Please contact HR.");
+                        return Page();
+                    }
+
                     var instructor = new Instructor
                     {
                         ApplicationUserId = user.Id,
@@ -161,7 +171,7 @@ public class RegisterModel : PageModel
                         LastName = Input.LastName,
                         Email = Input.Email,
                         PhoneNumber = Input.PhoneNumber,
-                        EmployeeId = Input.EmployeeId ?? "",
+                        ValidEmployeeIdId = validEmployeeId.Id,
                         SpecializationId = Input.SpecializationId ?? 1
                     };
                     _context.Instructors.Add(instructor);

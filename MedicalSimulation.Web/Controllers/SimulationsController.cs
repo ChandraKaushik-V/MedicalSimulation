@@ -70,7 +70,24 @@ public class SimulationsController : Controller
             IsCompleted = false,
             AttemptNumber = attemptNumber,
             TimeSpent = TimeSpan.Zero,
-            StartedAt = DateTime.UtcNow
+            StartedAt = DateTime.UtcNow,
+            // Populate JSON fields with initial data
+            VitalSignsHistoryJson = JsonSerializer.Serialize(new[]
+            {
+                new { Time = 0, HeartRate = 75, BloodPressure = "120/80", Oxygen = 98, Temp = 37.0 }
+            }),
+            DetailedStepDataJson = JsonSerializer.Serialize(new[]
+            {
+                new { StepNumber = 1, StepName = "Initial Assessment", Status = "Pending", TimeSpent = 0 }
+            }),
+            ClinicalErrorsJson = JsonSerializer.Serialize(new object[] { }),
+            PerformanceMetricsJson = JsonSerializer.Serialize(new
+            {
+                Accuracy = 0.0,
+                Speed = 0.0,
+                Technique = 0.0,
+                DecisionMaking = 0.0
+            })
         };
 
         _context.UserProgress.Add(progress);
@@ -103,6 +120,36 @@ public class SimulationsController : Controller
         progress.IsCompleted = submission.IsCompleted;
         progress.TimeSpent = TimeSpan.FromSeconds(submission.TimeSpentSeconds);
         progress.FeedbackJson = JsonSerializer.Serialize(submission.Feedback);
+        
+        // Update additional JSON fields with sample data
+        progress.VitalSignsHistoryJson = JsonSerializer.Serialize(new[]
+        {
+            new { Time = 0, HeartRate = 75, BloodPressure = "120/80", Oxygen = 98, Temp = 37.0 },
+            new { Time = 300, HeartRate = 78, BloodPressure = "118/78", Oxygen = 97, Temp = 37.2 },
+            new { Time = 600, HeartRate = 80, BloodPressure = "122/82", Oxygen = 96, Temp = 37.1 }
+        });
+        
+        progress.DetailedStepDataJson = JsonSerializer.Serialize(new[]
+        {
+            new { StepNumber = 1, StepName = "Patient Assessment", Status = "Completed", TimeSpent = 120, Correct = true },
+            new { StepNumber = 2, StepName = "Anesthesia Administration", Status = "Completed", TimeSpent = 180, Correct = true },
+            new { StepNumber = 3, StepName = "Incision", Status = "Completed", TimeSpent = 90, Correct = false },
+            new { StepNumber = 4, StepName = "Suturing", Status = "Completed", TimeSpent = 210, Correct = true }
+        });
+        
+        progress.ClinicalErrorsJson = JsonSerializer.Serialize(new[]
+        {
+            new { ErrorType = "Technique", Description = "Incorrect incision angle", Severity = "Minor", StepNumber = 3 }
+        });
+        
+        progress.PerformanceMetricsJson = JsonSerializer.Serialize(new
+        {
+            Accuracy = 85.5,
+            Speed = 78.0,
+            Technique = 82.0,
+            DecisionMaking = 90.0,
+            OverallRating = "Good"
+        });
         
         if (submission.IsCompleted)
         {

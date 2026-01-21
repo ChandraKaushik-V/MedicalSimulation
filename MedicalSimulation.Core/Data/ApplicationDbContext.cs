@@ -19,6 +19,7 @@ namespace MedicalSimulation.Core.Data
         public DbSet<Instructor> Instructors { get; set; }
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<InstructorSpecialization> InstructorSpecializations { get; set; }
+        public DbSet<ValidInstructorEmployeeId> ValidInstructorEmployeeIds { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -34,6 +35,15 @@ namespace MedicalSimulation.Core.Data
                 new InstructorSpecialization { Id = 1, Name = "Dermatology", Description = "Skin and related conditions" },
                 new InstructorSpecialization { Id = 2, Name = "Neurosurgery", Description = "Brain and nervous system surgery" },
                 new InstructorSpecialization { Id = 3, Name = "Cardiology", Description = "Heart and cardiovascular system" }
+            );
+
+            // Seed ValidInstructorEmployeeIds
+            builder.Entity<ValidInstructorEmployeeId>().HasData(
+                new ValidInstructorEmployeeId { Id = 1, EmployeeId = "EMP001", FirstName = "John", LastName = "Doe", IsActive = true },
+                new ValidInstructorEmployeeId { Id = 2, EmployeeId = "EMP002", FirstName = "Jane", LastName = "Smith", IsActive = true },
+                new ValidInstructorEmployeeId { Id = 3, EmployeeId = "EMP003", FirstName = "Michael", LastName = "Johnson", IsActive = true },
+                new ValidInstructorEmployeeId { Id = 4, EmployeeId = "EMP004", FirstName = "Sarah", LastName = "Williams", IsActive = true },
+                new ValidInstructorEmployeeId { Id = 5, EmployeeId = "EMP005", FirstName = "David", LastName = "Brown", IsActive = true }
             );
 
             // Seed Simulation
