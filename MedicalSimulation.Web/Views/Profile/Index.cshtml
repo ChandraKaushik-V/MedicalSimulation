@@ -1,0 +1,70 @@
+@{
+    ViewData["Title"] = "My Profile";
+    var profileData = ViewBag.ProfileData;
+}
+
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <i class="fas fa-user-circle"></i>
+        </div>
+        <h1 class="profile-name">@profileData.FirstName @profileData.LastName</h1>
+        <p class="profile-role">
+            <i class="fas fa-graduation-cap"></i> Student
+        </p>
+    </div>
+
+    <div class="profile-card">
+        <h2 class="profile-section-title">
+            <i class="fas fa-info-circle"></i> Personal Information
+        </h2>
+        
+        <div class="profile-info-grid">
+            <div class="profile-info-item">
+                <label class="profile-label">
+                    <i class="fas fa-user"></i> Full Name
+                </label>
+                <p class="profile-value">@profileData.FirstName @profileData.LastName</p>
+            </div>
+
+            <div class="profile-info-item">
+                <label class="profile-label">
+                    <i class="fas fa-envelope"></i> Email Address
+                </label>
+                <p class="profile-value">@profileData.Email</p>
+            </div>
+
+            <div class="profile-info-item">
+                <label class="profile-label">
+                    <i class="fas fa-phone"></i> Phone Number
+                </label>
+                <p class="profile-value">@profileData.PhoneNumber</p>
+            </div>
+
+            <div class="profile-info-item">
+                <label class="profile-label">
+                    <i class="fas fa-id-card"></i> Student ID
+                </label>
+                <p class="profile-value">@profileData.StudentId</p>
+            </div>
+
+            <div class="profile-info-item">
+                <label class="profile-label">
+                    <i class="fas fa-calendar-alt"></i> Member Since
+                </label>
+                <p class="profile-value">@profileData.CreatedAt.ToString("MMMM dd, yyyy")</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-actions">
+        <form asp-area="Identity" 
+              asp-page="/Account/Logout" 
+              method="post" 
+              class="profile-logout-form">
+            <button type="submit" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </form>
+    </div>
+</div>

@@ -67,9 +67,18 @@ public class DashboardController : Controller
     [Authorize(Roles = "Instructor")]
     public async Task<IActionResult> InstructorIndex(string? studentId = null)
     {
+        var instructorUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var instructor = await _context.Instructors.FirstOrDefaultAsync(i => i.ApplicationUserId == instructorUserId);
+
+        if (instructor == null)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
         var allProgress = await _context.UserProgress
             .Include(up => up.Simulation)
             .Include(up => up.User)
+            .Where(up => up.Simulation!.SpecialtyId == instructor.SpecializationId)
             .OrderByDescending(up => up.StartedAt)
             .ToListAsync();
 

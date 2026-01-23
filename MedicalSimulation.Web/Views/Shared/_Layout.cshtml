@@ -47,24 +47,42 @@
                     <ul class="navbar-nav ms-auto">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-user-circle"></i> @User.Identity.Name @(User.IsInRole("Instructor") ? "(Instructor)" : "(Student)")
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                                    <li>
-                                        <form asp-area="Identity"
-                                              asp-page="/Account/Logout"
-                                              method="post"
-                                              id="logoutForm">
-                                            <button type="submit" class="dropdown-item">
-                                                <i class="fas fa-sign-out-alt"></i> Logout
-                                            </button>
-                                        </form>
+                            @* Check if we're on the Home page for students *@
+                            var isHomePage = ViewContext.RouteData.Values["controller"]?.ToString() == "Home" 
+                                          && ViewContext.RouteData.Values["action"]?.ToString() == "Index";
+                            var isStudent = User.IsInRole("Student");
+                            
+                            @if (isHomePage && isStudent)
+                            {
+                                @* Show profile icon on home page for students *@
+                                <li class="nav-item">
+                                    <a class="nav-link profile-icon-link" asp-controller="Profile" asp-action="Index" title="My Profile">
+                                        <i class="fas fa-user-circle fa-2x"></i>
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                @* Show regular user dropdown on other pages *@
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-user-circle"></i> @User.Identity.Name @(User.IsInRole("Instructor") ? "(Instructor)" : "(Student)")
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                                        <li>
+                                            <form asp-area="Identity"
+                                                  asp-page="/Account/Logout"
+                                                  method="post"
+                                                  id="logoutForm">
+                                                <button type="submit" class="dropdown-item">
+                                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                                </button>
+                                            </form>
 
-                                    </li>
-                                </ul>
-                            </li>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
                         }
                         else
                         {

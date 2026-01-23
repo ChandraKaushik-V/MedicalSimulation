@@ -27,7 +27,36 @@ namespace MedicalSimulation.Core.Data
 
             // Seed Specialties
             builder.Entity<Specialty>().HasData(
-                new Specialty { Id = 1, Name = "Basic Surgical Skills", Description = "Fundamental techniques for all surgeons" }
+                new Specialty 
+                { 
+                    Id = 1, 
+                    Name = "Dermatology", 
+                    Description = "Skin and related conditions, including surgical procedures",
+                    IconClass = "fa-hand-holding-medical",
+                    Color = "#10b981",
+                    DisplayOrder = 1,
+                    IsActive = true
+                },
+                new Specialty 
+                { 
+                    Id = 2, 
+                    Name = "Neurology", 
+                    Description = "Brain, spinal cord, and nervous system procedures",
+                    IconClass = "fa-brain",
+                    Color = "#8b5cf6",
+                    DisplayOrder = 2,
+                    IsActive = true
+                },
+                new Specialty 
+                { 
+                    Id = 3, 
+                    Name = "Cardiology", 
+                    Description = "Heart and cardiovascular system procedures",
+                    IconClass = "fa-heart-pulse",
+                    Color = "#ef4444",
+                    DisplayOrder = 3,
+                    IsActive = true
+                }
             );
 
             // Seed InstructorSpecializations
@@ -53,7 +82,7 @@ namespace MedicalSimulation.Core.Data
                     Id = 1,
                     Title = "Subcuticular Running Suture",
                     Description = "Master the subcuticular running suture technique with this interactive video simulation.",
-                    SpecialtyId = 1,
+                    SpecialtyId = 1, // Dermatology
                     Difficulty = DifficultyLevel.Intermediate,
                     EstimatedMinutes = 15,
                     TotalStates = 6,
@@ -64,7 +93,7 @@ namespace MedicalSimulation.Core.Data
                     Id = 2,
                     Title = "Posterior Neck Craniectomy",
                     Description = "Learn the critical steps and anatomical considerations in performing a posterior neck craniectomy.",
-                    SpecialtyId = 1,
+                    SpecialtyId = 2, // Neurology
                     Difficulty = DifficultyLevel.Advanced,
                     EstimatedMinutes = 10,
                     TotalStates = 6,

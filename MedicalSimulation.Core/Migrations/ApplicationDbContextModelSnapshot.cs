@@ -61,7 +61,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasIndex("UserProgressId");
 
-                    b.ToTable("Feedbacks");
+                    b.ToTable("Feedbacks", (string)null);
                 });
 
             modelBuilder.Entity("MedicalSimulation.Core.Models.Instructor", b =>
@@ -106,7 +106,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasIndex("ValidEmployeeIdId");
 
-                    b.ToTable("Instructors");
+                    b.ToTable("Instructors", (string)null);
                 });
 
             modelBuilder.Entity("MedicalSimulation.Core.Models.InstructorSpecialization", b =>
@@ -126,7 +126,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("InstructorSpecializations");
+                    b.ToTable("InstructorSpecializations", (string)null);
 
                     b.HasData(
                         new
@@ -190,7 +190,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasIndex("SpecialtyId");
 
-                    b.ToTable("Simulations");
+                    b.ToTable("Simulations", (string)null);
 
                     b.HasData(
                         new
@@ -251,7 +251,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Specialties");
+                    b.ToTable("Specialties", (string)null);
 
                     b.HasData(
                         new
@@ -300,7 +300,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("Students");
+                    b.ToTable("Students", (string)null);
                 });
 
             modelBuilder.Entity("MedicalSimulation.Core.Models.SurgeryState", b =>
@@ -350,7 +350,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("SurgeryStates");
+                    b.ToTable("SurgeryStates", (string)null);
 
                     b.HasData(
                         new
@@ -578,7 +578,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserProgress");
+                    b.ToTable("UserProgress", (string)null);
                 });
 
             modelBuilder.Entity("MedicalSimulation.Core.Models.ValidInstructorEmployeeId", b =>
@@ -609,7 +609,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ValidInstructorEmployeeIds");
+                    b.ToTable("ValidInstructorEmployeeIds", (string)null);
 
                     b.HasData(
                         new
