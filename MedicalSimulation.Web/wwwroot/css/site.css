@@ -1093,3 +1093,225 @@ h6 {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
+
+/* Profile Icon Link */
+.profile-icon-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all var(--transition-base);
+}
+
+.profile-icon-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.1);
+}
+
+.profile-icon-link i {
+    transition: all var(--transition-base);
+}
+
+.profile-icon-link:hover i {
+    transform: rotate(15deg);
+    color: #fff;
+}
+
+/* Profile Page */
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    animation: fadeIn 0.6s ease-out;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: var(--radius-2xl);
+    color: white;
+    box-shadow: var(--shadow-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+}
+
+.profile-avatar {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1.5rem;
+}
+
+.profile-avatar i {
+    font-size: 6rem;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.profile-name {
+    position: relative;
+    z-index: 1;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.profile-role {
+    position: relative;
+    z-index: 1;
+    font-size: 1.25rem;
+    opacity: 0.95;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.profile-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 2rem;
+    border: 2px solid var(--border-color);
+    transition: all var(--transition-base);
+}
+
+.profile-card:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-4px);
+}
+
+.profile-section-title {
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+.profile-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.profile-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.profile-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.profile-label i {
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.profile-value {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--primary-color);
+    margin: 0;
+}
+
+.profile-actions {
+    text-align: center;
+}
+
+.profile-logout-form {
+    display: inline-block;
+}
+
+.btn-logout {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2.5rem;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-md);
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-logout:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-xl), 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.btn-logout:active {
+    transform: translateY(-1px);
+}
+
+.btn-logout i {
+    font-size: 1.25rem;
+}
+
+/* Responsive Design for Profile */
+@media (max-width: 768px) {
+    .profile-header {
+        padding: 2rem 1rem;
+    }
+
+    .profile-name {
+        font-size: 2rem;
+    }
+
+    .profile-avatar i {
+        font-size: 4.5rem;
+    }
+
+    .profile-card {
+        padding: 1.5rem;
+    }
+
+    .profile-info-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .btn-logout {
+        width: 100%;
+        justify-content: center;
+    }
+}

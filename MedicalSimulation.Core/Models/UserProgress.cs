@@ -12,12 +12,6 @@ public class UserProgress
     public TimeSpan TimeSpent { get; set; }
     public string? FeedbackJson { get; set; } // Stores detailed feedback/mistakes
     
-    // Medical Realism & Performance Tracking
-    public string? VitalSignsHistoryJson { get; set; } // Patient vitals throughout simulation
-    public string? DetailedStepDataJson { get; set; } // Precision, timing, force for each step
-    public string? ClinicalErrorsJson { get; set; } // Categorized errors with severity
-    public string? PerformanceMetricsJson { get; set; } // Calculated metrics (efficiency, safety, accuracy)
-    
     public DateTime StartedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
     

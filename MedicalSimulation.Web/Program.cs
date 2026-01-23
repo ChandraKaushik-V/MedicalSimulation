@@ -63,6 +63,99 @@ app.UseRouting();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    
+    // FIX DATABASE SCHEMA FIRST - Before DbInitializer runs
+    
+    // Note: ValidInstructorEmployeeIds table creation and Instructors table fixes 
+    // should be handled by running the db_fix.sql script manually.
+    
+    // Drop unused UserProgress columns if they exist
+    await context.Database.ExecuteSqlRawAsync(@"
+        IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'UserProgress') AND name = 'VitalSignsHistoryJson')
+        BEGIN
+            ALTER TABLE UserProgress DROP COLUMN VitalSignsHistoryJson;
+        END
+        
+        IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'UserProgress') AND name = 'DetailedStepDataJson')
+        BEGIN
+            ALTER TABLE UserProgress DROP COLUMN DetailedStepDataJson;
+        END
+        
+        IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'UserProgress') AND name = 'ClinicalErrorsJson')
+        BEGIN
+            ALTER TABLE UserProgress DROP COLUMN ClinicalErrorsJson;
+        END
+        
+        IF EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'UserProgress') AND name = 'PerformanceMetricsJson')
+        BEGIN
+            ALTER TABLE UserProgress DROP COLUMN PerformanceMetricsJson;
+        END
+    ");
+    
+    // Update specialties to new structure
+    await context.Database.ExecuteSqlRawAsync(@"
+        UPDATE Specialties 
+        SET Name = 'Dermatology', 
+            Description = 'Skin and related conditions, including surgical procedures',
+            IconClass = 'fa-hand-holding-medical',
+            Color = '#10b981',
+            DisplayOrder = 1,
+            IsActive = 1
+        WHERE Id = 1
+    ");
+    
+    // Insert or update Neurology
+    await context.Database.ExecuteSqlRawAsync(@"
+        IF NOT EXISTS (SELECT 1 FROM Specialties WHERE Id = 2)
+        BEGIN
+            SET IDENTITY_INSERT Specialties ON;
+            INSERT INTO Specialties (Id, Name, Description, IconClass, Color, DisplayOrder, IsActive)
+            VALUES (2, 'Neurology', 'Brain, spinal cord, and nervous system procedures', 'fa-brain', '#8b5cf6', 2, 1);
+            SET IDENTITY_INSERT Specialties OFF;
+        END
+        ELSE
+        BEGIN
+            UPDATE Specialties 
+            SET Name = 'Neurology', 
+                Description = 'Brain, spinal cord, and nervous system procedures',
+                IconClass = 'fa-brain',
+                Color = '#8b5cf6',
+                DisplayOrder = 2,
+                IsActive = 1
+            WHERE Id = 2;
+        END
+    ");
+    
+    // Insert or update Cardiology
+    await context.Database.ExecuteSqlRawAsync(@"
+        IF NOT EXISTS (SELECT 1 FROM Specialties WHERE Id = 3)
+        BEGIN
+            SET IDENTITY_INSERT Specialties ON;
+            INSERT INTO Specialties (Id, Name, Description, IconClass, Color, DisplayOrder, IsActive)
+            VALUES (3, 'Cardiology', 'Heart and cardiovascular system procedures', 'fa-heart-pulse', '#ef4444', 3, 1);
+            SET IDENTITY_INSERT Specialties OFF;
+        END
+        ELSE
+        BEGIN
+            UPDATE Specialties 
+            SET Name = 'Cardiology', 
+                Description = 'Heart and cardiovascular system procedures',
+                IconClass = 'fa-heart-pulse',
+                Color = '#ef4444',
+                DisplayOrder = 3,
+                IsActive = 1
+            WHERE Id = 3;
+        END
+    ");
+    
+    // Update simulation mappings
+    await context.Database.ExecuteSqlRawAsync(@"
+        UPDATE Simulations SET SpecialtyId = 1 WHERE Id = 1;
+        UPDATE Simulations SET SpecialtyId = 2 WHERE Id = 2;
+    ");
+    
+    // NOW run DbInitializer after schema is fixed
     await DbInitializer.Initialize(services);
 }
 
