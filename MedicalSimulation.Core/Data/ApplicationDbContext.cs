@@ -98,6 +98,17 @@ namespace MedicalSimulation.Core.Data
                     EstimatedMinutes = 10,
                     TotalStates = 6,
                     ThumbnailUrl = "/pictures/craniectomy.png"
+                },
+                new Simulation
+                {
+                    Id = 3,
+                    Title = "Carotid Artery Stenting",
+                    Description = "Learn the essential steps and techniques for performing carotid artery stenting to restore blood flow.",
+                    SpecialtyId = 3, // Cardiology
+                    Difficulty = DifficultyLevel.Advanced,
+                    EstimatedMinutes = 10,
+                    TotalStates = 6,
+                    ThumbnailUrl = "/pictures/cartoid.jpg"
                 }
             );
 
@@ -289,6 +300,104 @@ namespace MedicalSimulation.Core.Data
                     HotspotDataJson = "{\"pauseTime\":93.431}",
                     AnswerOptionsJson = "[\"Immediate skin closure with sutures\",\"Irrigation and leave the wound open\",\"Apply a sterile pressure dressing / protective dressing\",\"Begin deep muscle reconstruction\"]",
                     CorrectAnswerIndex = 2,
+                    LayersJson = "[]"
+                },
+
+                // ===== CAROTID ARTERY STENTING SIMULATION STATES =====
+                // State 1: Pause at 10s - Arterial Access Vessel
+                new SurgeryState
+                {
+                    Id = 13,
+                    SimulationId = 3,
+                    StateNumber = 1,
+                    StateName = "Arterial Access Vessel",
+                    Description = "Identify the vessel being accessed for arterial entry.",
+                    VideoUrl = "/videos/simulations/Cartoid-artery-stenting.mp4",
+                    InteractionType = "mcq",
+                    QuestionText = "Which vessel is being accessed for arterial entry?",
+                    HotspotDataJson = "{\"pauseTime\":10}",
+                    AnswerOptionsJson = "[\"Radial artery\",\"Radial vein\",\"Ulnar artery\",\"Cephalic vein\"]",
+                    CorrectAnswerIndex = 0,
+                    LayersJson = "[]"
+                },
+                // State 2: Pause at 15s - Next Step After Guidewire
+                new SurgeryState
+                {
+                    Id = 14,
+                    SimulationId = 3,
+                    StateNumber = 2,
+                    StateName = "Next Step After Guidewire",
+                    Description = "Determine the next step after successful arterial puncture and guidewire placement.",
+                    VideoUrl = "/videos/simulations/Cartoid-artery-stenting.mp4",
+                    InteractionType = "mcq",
+                    QuestionText = "After successful arterial puncture and guidewire placement, what is the next step in carotid artery stenting?",
+                    HotspotDataJson = "{\"pauseTime\":15}",
+                    AnswerOptionsJson = "[\"Deploy the carotid stent\",\"Insert an introducer sheath over the guidewire\",\"Inflate the balloon to dilate the artery\",\"Close the puncture site\"]",
+                    CorrectAnswerIndex = 1,
+                    LayersJson = "[]"
+                },
+                // State 3: Pause at 28s - Purpose of Sheath Insertion
+                new SurgeryState
+                {
+                    Id = 15,
+                    SimulationId = 3,
+                    StateNumber = 3,
+                    StateName = "Purpose of Sheath Insertion",
+                    Description = "Understand the primary purpose of inserting the sheath.",
+                    VideoUrl = "/videos/simulations/Cartoid-artery-stenting.mp4",
+                    InteractionType = "mcq",
+                    QuestionText = "What is the primary purpose of inserting this sheath at this stage of the procedure?",
+                    HotspotDataJson = "{\"pauseTime\":28}",
+                    AnswerOptionsJson = "[\"To inject contrast directly into the brain\",\"To maintain stable arterial access for catheter and device passage\",\"To remove arterial plaque\",\"To close the puncture site\"]",
+                    CorrectAnswerIndex = 1,
+                    LayersJson = "[]"
+                },
+                // State 4: Pause at 45s - Contrast Dye Purpose
+                new SurgeryState
+                {
+                    Id = 16,
+                    SimulationId = 3,
+                    StateNumber = 4,
+                    StateName = "Contrast Dye Purpose",
+                    Description = "Identify why contrast dye is injected at this stage.",
+                    VideoUrl = "/videos/simulations/Cartoid-artery-stenting.mp4",
+                    InteractionType = "mcq",
+                    QuestionText = "Why is contrast dye injected at this stage of the carotid artery stenting procedure?",
+                    HotspotDataJson = "{\"pauseTime\":45}",
+                    AnswerOptionsJson = "[\"To dissolve the plaque\",\"To visualize the carotid artery and identify the stenosis\",\"To widen the artery\",\"To anesthetize the vessel\"]",
+                    CorrectAnswerIndex = 1,
+                    LayersJson = "[]"
+                },
+                // State 5: Pause at 55s - Stent Deployment Location
+                new SurgeryState
+                {
+                    Id = 17,
+                    SimulationId = 3,
+                    StateNumber = 5,
+                    StateName = "Stent Deployment Location",
+                    Description = "Identify the correct location for stent deployment.",
+                    VideoUrl = "/videos/simulations/Cartoid-artery-stenting.mp4",
+                    InteractionType = "mcq",
+                    QuestionText = "Where should the stent be deployed during a carotid artery stenting procedure?",
+                    HotspotDataJson = "{\"pauseTime\":55}",
+                    AnswerOptionsJson = "[\"In the subclavian artery\",\"In the internal carotid artery at the site of stenosis\",\"In the external carotid artery\",\"In the aortic arch\"]",
+                    CorrectAnswerIndex = 1,
+                    LayersJson = "[]"
+                },
+                // State 6: Pause at 100s (1:40) - Purpose of Stent Deployment, end at 106s (1:46)
+                new SurgeryState
+                {
+                    Id = 18,
+                    SimulationId = 3,
+                    StateNumber = 6,
+                    StateName = "Purpose of Stent Deployment",
+                    Description = "Understand the primary purpose of deploying the stent.",
+                    VideoUrl = "/videos/simulations/Cartoid-artery-stenting.mp4",
+                    InteractionType = "mcq",
+                    QuestionText = "What is the primary purpose of deploying the stent at this location?",
+                    HotspotDataJson = "{\"pauseTime\":100,\"endTime\":106}",
+                    AnswerOptionsJson = "[\"To dissolve the plaque chemically\",\"To widen the narrowed artery and restore blood flow\",\"To block blood flow to the brain\",\"To remove the artery wall\"]",
+                    CorrectAnswerIndex = 1,
                     LayersJson = "[]"
                 }
             );

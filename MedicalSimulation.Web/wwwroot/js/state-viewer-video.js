@@ -96,9 +96,9 @@ class StateViewerVideo {
         this.isTransitioning = true;
         this.updateUI(state);
 
-        // For the first state, seek to the beginning
+        // For the first state, seek to 6 seconds instead of the beginning
         if (index === 0) {
-            this.video.currentTime = 0;
+            this.video.currentTime = 6;
         }
         // Otherwise, continue playing from current position
 
@@ -288,13 +288,33 @@ class StateViewerVideo {
         // Save final score to server
         this.saveScore();
 
-        // Play the video to the end
-        this.video.play();
+        // Check if the last state has an endTime specified
+        const lastState = this.states[this.states.length - 1];
+        const endTime = lastState?.hotspotData?.endTime;
 
-        // When video ends, redirect to results page
-        this.video.onended = () => {
-            window.location.href = `/Simulations/Results/${this.progressId}`;
-        };
+        if (endTime && typeof endTime === 'number') {
+            // Play the video until the specified end time
+            this.video.play();
+
+            const onTimeUpdate = () => {
+                if (this.video.currentTime >= endTime) {
+                    this.video.pause();
+                    this.video.removeEventListener('timeupdate', onTimeUpdate);
+                    // Redirect to results page
+                    window.location.href = `/Simulations/Results/${this.progressId}`;
+                }
+            };
+
+            this.video.addEventListener('timeupdate', onTimeUpdate);
+        } else {
+            // Play the video to the end (original behavior)
+            this.video.play();
+
+            // When video ends, redirect to results page
+            this.video.onended = () => {
+                window.location.href = `/Simulations/Results/${this.progressId}`;
+            };
+        }
     }
 
     /* ---------------- HELPERS ---------------- */
