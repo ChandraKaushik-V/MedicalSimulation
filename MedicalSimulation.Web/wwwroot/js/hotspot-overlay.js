@@ -388,8 +388,8 @@ class ClickableHotspotOverlay {
         this.showCorrectLocation();
 
         const message = this.isMultiHotspot
-            ? 'Correct locations revealed! Click on all highlighted areas.'
-            : 'Correct location revealed! Click on the highlighted area.';
+            ? 'Correct location revealed!'
+            : 'Correct location revealed!';
         this.showMessage(message, '#3b82f6');
 
         console.log('Correct location revealed:', this.isMultiHotspot ? this.hotspots : this.currentHotspot);

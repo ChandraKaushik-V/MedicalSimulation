@@ -10,461 +10,601 @@
     var isStudentSelected = !string.IsNullOrEmpty(selectedStudentId);
 }
 
+<!-- Google Fonts (Optional, adds polish) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-    .instructor-dashboard {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 2rem 1rem;
+    /* Global Reset & Base Styles */
+    :root {
+        --primary-color: #4f46e5; /* Indigo */
+        --primary-hover: #4338ca;
+        --bg-color: #f3f4f6;      /* Light Gray Background */
+        --card-bg: #ffffff;
+        --text-main: #1f2937;
+        --text-muted: #6b7280;
+        --border-color: #e5e7eb;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --radius: 16px;
     }
 
-    .stat-card {
-        background: white;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
+    body {
+        background-color: var(--bg-color);
+        font-family: 'Inter', sans-serif;
+        color: var(--text-main);
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem;
+    }
+
+    /* Typography Utilities */
+    .page-title {
+        font-size: 1.875rem;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .page-subtitle {
+        color: var(--text-muted);
+        margin-bottom: 2.5rem;
+        font-size: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Cards Common */
+    .dashboard-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        transition: transform 0.2s, box-shadow 0.2s;
+        overflow: hidden;
+    }
+
+    /* Top Stats Row */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card-inner {
         padding: 1.5rem;
         display: flex;
         align-items: center;
-        gap: 1rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        gap: 1.25rem;
     }
-    
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 10px;
+
+    .stat-icon-wrapper {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    /* Student List Grid */
+    .students-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .student-card {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        height: 100%;
+    }
+
+    .student-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-color);
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .student-card-header {
+        padding: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .student-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.25rem;
-        flex-shrink: 0;
-    }
-
-    .student-card {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        transition: all 0.2s;
-        cursor: pointer;
-        text-decoration: none;
-        color: inherit;
-        display: block;
-    }
-
-    .student-card:hover {
-        border-color: #6366f1;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
-        transform: translateY(-2px);
-    }
-
-    .student-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .avatar {
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         font-weight: 700;
-        font-size: 1.2rem;
         flex-shrink: 0;
+        box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
     }
 
-    .student-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 1rem;
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid #e2e8f0;
+    .student-info h5 {
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        color: #111827;
     }
 
-    .stat-item {
+    .student-meta {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+    }
+
+    .student-card-stats {
+        background-color: #f9fafb;
+        border-top: 1px solid var(--border-color);
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
         text-align: center;
     }
 
-    .stat-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        display: block;
+    .mini-stat-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        font-weight: 600;
     }
 
-    .stat-label {
-        font-size: 0.8rem;
-        color: #64748b;
+    .mini-stat-value {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #374151;
+    }
+
+    /* Detail View specific */
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: white;
+        padding: 0.75rem 1.25rem;
+        border-radius: 50px;
+        color: var(--text-muted);
+        font-weight: 600;
+        text-decoration: none;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 2rem;
+        transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+        background: white;
+        color: var(--primary-color);
+        box-shadow: var(--shadow-md);
+        transform: translateX(-2px);
+    }
+
+    .profile-hero {
+        background: white;
+        border-radius: var(--radius);
+        padding: 2rem;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        border: 1px solid var(--border-color);
+    }
+    
+    @@media(max-width: 768px) {
+        .profile-hero {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+
+    .profile-avatar-lg {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+
+    .profile-stats-row {
+        display: flex;
+        gap: 3rem;
+        margin-top: 0.5rem;
+    }
+    
+    .profile-stat-box {
+        display: flex;
+        flex-direction: column;
+    }
+    .profile-stat-box .val { font-size: 1.5rem; font-weight: 800; }
+    .profile-stat-box .lbl { font-size: 0.875rem; color: var(--text-muted); }
+
+    /* Attempt List */
+    .attempt-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
     }
 
     .attempt-card {
         background: white;
-        border: 1px solid #e2e8f0;
         border-radius: 12px;
-        margin-bottom: 1rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
         overflow: hidden;
     }
 
-    .attempt-row {
-        padding: 1.25rem;
+    .attempt-header {
+        padding: 1.5rem;
         display: grid;
-        grid-template-columns: 1fr 150px 120px;
-        gap: 1rem;
+        grid-template-columns: 1fr auto;
+        gap: 2rem;
         align-items: center;
     }
 
-    .sim-info {
-        min-width: 0;
+    @@media(max-width: 768px) {
+        .attempt-header {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
     }
 
-    .sim-title {
-        font-weight: 600;
-        font-size: 1rem;
-        color: #1e293b;
-        margin-bottom: 0.25rem;
-    }
-
-    .sim-meta {
+    .sim-date-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #f3f4f6;
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
         font-size: 0.85rem;
-        color: #64748b;
+        color: #4b5563;
+        margin-top: 0.5rem;
+    }
+
+    .score-badge-circle {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        border: 4px solid #e5e7eb;
         display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
     }
+    .score-val { font-size: 1.1rem; font-weight: 800; }
+    .score-max { font-size: 0.7rem; color: #9ca3af; }
 
-    .score-display {
-        text-align: center;
-    }
-
-    .score-val {
-        font-size: 1.5rem;
-        font-weight: 700;
-        display: block;
-    }
-
-    .score-label {
-        font-size: 0.75rem;
-        color: #64748b;
-    }
-
-    .feedback-toggle {
-        padding: 0.6rem 1.2rem;
-        border-radius: 8px;
-        font-weight: 500;
-        font-size: 0.9rem;
-        transition: all 0.2s;
-        border: none;
-        cursor: pointer;
-        white-space: nowrap;
-    }
-
-    .feedback-section {
+    /* Feedback Form */
+    .feedback-panel {
         background-color: #f8fafc;
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid var(--border-color);
         padding: 1.5rem;
     }
 
-    .feedback-form textarea {
+    .custom-textarea {
         width: 100%;
-        min-height: 100px;
-        padding: 0.75rem;
-        border: 1px solid #cbd5e1;
+        border: 1px solid #d1d5db;
         border-radius: 8px;
-        font-family: inherit;
-        font-size: 0.9rem;
-        resize: vertical;
+        padding: 1rem;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .feedback-form textarea:focus {
+    .custom-textarea:focus {
         outline: none;
-        border-color: #6366f1;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
 
-    .btn-send {
-        background: #6366f1;
-        color: white;
-        padding: 0.6rem 1.5rem;
-        border: none;
+    .btn-action {
+        background-color: white;
+        border: 1px solid #d1d5db;
+        color: #374151;
+        padding: 0.5rem 1rem;
         border-radius: 8px;
         font-weight: 500;
-        cursor: pointer;
         transition: all 0.2s;
     }
 
-    .btn-send:hover {
-        background: #4f46e5;
+    .btn-action:hover {
+        background-color: #f3f4f6;
     }
 
-    .back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #6366f1;
-        text-decoration: none;
+    .btn-primary-action {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
         font-weight: 500;
-        margin-bottom: 1.5rem;
-        transition: gap 0.2s;
     }
-
-    .back-link:hover {
-        gap: 0.75rem;
-    }
-
-    @@media (max-width: 992px) {
-        .attempt-row {
-            grid-template-columns: 1fr;
-            gap: 0.75rem;
-        }
+    
+    .btn-primary-action:hover {
+        background-color: var(--primary-hover);
+        color: white;
     }
 </style>
 
-<div class="instructor-dashboard">
+<div class="dashboard-container">
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-bottom: 1.5rem;">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
     
     @if (isStudentSelected)
     {
-        <!-- STUDENT DETAIL VIEW -->
-        <a asp-action="InstructorIndex" class="back-link">
-            <i class="fas fa-arrow-left"></i> Back to Students
+        <!-- ========================= -->
+        <!-- STUDENT DETAIL VIEW       -->
+        <!-- ========================= -->
+
+        <a asp-action="InstructorIndex" class="back-btn">
+            <i class="fas fa-arrow-left"></i> <span>Back to Students</span>
         </a>
 
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body p-4">
-                <div class="student-header">
-                    <div class="avatar">
-                        @(selectedStudent?.FirstName?.FirstOrDefault() ?? 'S')
-                    </div>
-                    <div>
-                        <h3 class="mb-1">@selectedStudent?.FirstName @selectedStudent?.LastName</h3>
-                        <div class="text-muted">
-                            <span>Student ID: @selectedStudent?.StudentId</span>
-                            <span class="mx-2">•</span>
-                            <span>@selectedStudent?.Email</span>
-                        </div>
-                    </div>
+        <!-- Student Profile Hero -->
+        <div class="profile-hero">
+            <div class="student-avatar profile-avatar-lg">
+                @(selectedStudent?.FirstName?.FirstOrDefault() ?? 'S')
+            </div>
+            <div style="flex-grow: 1;">
+                <h2 class="mb-1 fw-bold">@selectedStudent?.FirstName @selectedStudent?.LastName</h2>
+                <div class="text-muted mb-3">
+                    <i class="far fa-id-card me-1"></i> @selectedStudent?.StudentId
+                    <span class="mx-2 text-gray-300">|</span>
+                    <i class="far fa-envelope me-1"></i> @selectedStudent?.Email
                 </div>
 
-                <div class="student-stats">
-                    <div class="stat-item">
-                        <span class="stat-value text-primary">@Model.Count</span>
-                        <span class="stat-label">Total Attempts</span>
+                <div class="profile-stats-row">
+                    <div class="profile-stat-box">
+                        <span class="val text-primary">@Model.Count</span>
+                        <span class="lbl">Total Attempts</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-value text-success">@Model.Count(x => x.IsCompleted)</span>
-                        <span class="stat-label">Completed</span>
+                    <div class="profile-stat-box">
+                        <span class="val text-success">@Model.Count(x => x.IsCompleted)</span>
+                        <span class="lbl">Completed</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-value text-warning">@Model.Count(x => !(feedbacks?.Any(f => f.UserProgressId == x.Id) ?? false))</span>
-                        <span class="stat-label">Pending Feedback</span>
+                    <div class="profile-stat-box">
+                        <span class="val text-warning">@Model.Count(x => !(feedbacks?.Any(f => f.UserProgressId == x.Id) ?? false))</span>
+                        <span class="lbl">Need Feedback</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-value text-info">
+                    <div class="profile-stat-box">
+                        <span class="val text-dark">
                             @if (Model.Any(x => x.IsCompleted))
                             {
-                                @Model.Where(x => x.IsCompleted).Average(x => (x.Score / (double)x.MaxScore) * 100).ToString("F0")<text>%</text>
+                                @Model.Where(x => x.IsCompleted).Average(x => (x.Score / (double)x.MaxScore) * 100).ToString("F0")<small>%</small>
                             }
                             else
                             {
-                                <text>N/A</text>
+                                <span style="font-size: 1rem; color: #999;">N/A</span>
                             }
                         </span>
-                        <span class="stat-label">Avg Score</span>
+                        <span class="lbl">Avg. Score</span>
                     </div>
                 </div>
             </div>
         </div>
 
 
-        <h5 class="fw-bold mb-3">Simulation Attempts</h5>
+        <div class="section-title">
+            <i class="fas fa-history text-primary"></i> Simulation History
+        </div>
 
         @if (!Model.Any())
         {
-            <div class="text-center py-5 bg-white rounded-3 border">
-                <i class="fas fa-clipboard fa-3x text-muted mb-3"></i>
-                <p class="text-muted">No attempts found for this student.</p>
+            <div class="text-center py-5 dashboard-card">
+                <div class="text-muted mb-3 display-4"><i class="fas fa-clipboard"></i></div>
+                <h5 class="text-muted">No simulation attempts recorded.</h5>
             </div>
         }
 
+        <div class="attempt-list">
         @foreach (var item in Model)
         {
             var feedback = feedbacks?.FirstOrDefault(f => f.UserProgressId == item.Id);
             var scorePercent = item.MaxScore > 0 ? (int)((item.Score / (double)item.MaxScore) * 100) : 0;
-            var scoreColor = scorePercent >= 80 ? "success" : scorePercent >= 60 ? "warning" : "danger";
+            var borderColor = scorePercent >= 80 ? "#10b981" : scorePercent >= 60 ? "#f59e0b" : "#ef4444";
             
             <div class="attempt-card">
-                <div class="attempt-row">
-                    
-                    <div class="sim-info">
-                        <div class="sim-title">@item.Simulation?.Title</div>
-                        <div class="sim-meta">
-                            <span><i class="far fa-calendar me-1"></i>@item.StartedAt.ToLocalTime().ToString("MMM dd, yyyy")</span>
-                            <span>•</span>
-                            <span><i class="far fa-clock me-1"></i>@item.StartedAt.ToLocalTime().ToString("hh:mm tt")</span>
+                <div class="attempt-header">
+                    <!-- Column 1: Info -->
+                    <div>
+                        <h4 class="fw-bold text-dark mb-1">@item.Simulation?.Title</h4>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="sim-date-badge">
+                                <i class="far fa-calendar-alt"></i> @item.StartedAt.ToLocalTime().ToString("MMM dd, yyyy")
+                            </span>
+                            <span class="sim-date-badge">
+                                <i class="far fa-clock"></i> @item.StartedAt.ToLocalTime().ToString("hh:mm tt")
+                            </span>
                             @if (item.IsCompleted) 
                             { 
-                                <span class="text-success">• Completed</span> 
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2 d-flex align-items-center">Completed</span> 
                             }
                             else
                             {
-                                <span class="text-warning">• In Progress</span>
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-2 d-flex align-items-center">In Progress</span>
                             }
                         </div>
                     </div>
 
-                    <div class="score-display">
-                        <span class="score-val text-@scoreColor">@scorePercent%</span>
-                        <span class="score-label">@item.Score/@item.MaxScore pts</span>
-                    </div>
-
-                    <div>
-                        <button class="feedback-toggle @(feedback != null ? "btn btn-light border" : "btn btn-primary")" 
-                                type="button" 
-                                data-bs-toggle="collapse" 
-                                data-bs-target="#feedback-@item.Id">
-                            <i class="fas fa-comment me-1"></i>
-                            @(feedback != null ? "Edit" : "Feedback")
-                        </button>
+                    <!-- Column 2: Score -->
+                    <div class="text-center">
+                        <div class="score-badge-circle" style="border-color: @borderColor;">
+                            <span class="score-val" style="color: @borderColor;">@scorePercent%</span>
+                        </div>
+                        <div class="small text-muted mt-1">@item.Score / @item.MaxScore pts</div>
                     </div>
                 </div>
 
-                <div class="collapse feedback-section" id="feedback-@item.Id">
-                    <form asp-action="GiveFeedback" method="post" class="feedback-form">
-                        <input type="hidden" name="userProgressId" value="@item.Id" />
-                        
-                        @if (feedback != null)
-                        {
-                            <div class="mb-2 small text-muted">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Last feedback: @feedback.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")
+                <!-- Collapse Panel -->
+                <div class="collapse" id="feedback-@item.Id">
+                    <div class="feedback-panel">
+                        <form asp-action="GiveFeedback" method="post">
+                            <input type="hidden" name="userProgressId" value="@item.Id" />
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="fw-bold text-dark">Instructor Feedback</label>
+                                @if (feedback != null)
+                                {
+                                    <small class="text-muted fst-italic">Last updated: @feedback.CreatedAt.ToLocalTime().ToString("g")</small>
+                                }
                             </div>
-                        }
-                        
-                        <textarea name="feedbackText" 
-                                  placeholder="Enter your feedback for this attempt..." 
-                                  required>@(feedback?.FeedbackText)</textarea>
-                        
-                        <div class="mt-3 d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-sm btn-light" data-bs-toggle="collapse" data-bs-target="#feedback-@item.Id">
-                                Cancel
-                            </button>
-                            <button type="submit" class="btn-send">
-                                <i class="fas fa-paper-plane me-1"></i> Send Feedback
-                            </button>
-                        </div>
-                    </form>
+                            
+                            <textarea name="feedbackText" 
+                                      class="custom-textarea"
+                                      rows="4"
+                                      placeholder="Write your constructive feedback here..." 
+                                      required>@(feedback?.FeedbackText)</textarea>
+                            
+                            <div class="mt-3 d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-action" data-bs-toggle="collapse" data-bs-target="#feedback-@item.Id">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary-action">
+                                    <i class="fas fa-paper-plane me-2"></i> Submit Feedback
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         }
+        </div>
     }
     else
     {
-        <!-- STUDENT LIST VIEW -->
-        <div class="mb-4">
-            <h2 class="fw-bold mb-1">Instructor Dashboard</h2>
-            <p class="text-muted">Select a student to view their attempts and provide feedback.</p>
+        <!-- ========================= -->
+        <!-- DASHBOARD OVERVIEW VIEW   -->
+        <!-- ========================= -->
+
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <h1 class="page-title"><i class="fas fa-chalkboard-teacher text-primary"></i> Instructor Dashboard</h1>
+                <p class="page-subtitle">Overview of student performance and simulation activities.</p>
+            </div>
         </div>
         
-        <div class="row mb-4">
-            <div class="col-md-4 mb-3">
-                <div class="stat-card">
-                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div>
-                        <h3 class="mb-0 fw-bold">@(students?.Count ?? 0)</h3>
-                        <small class="text-muted">Total Students</small>
-                    </div>
+        <!-- Stats Row -->
+        <div class="stats-grid">
+            <div class="dashboard-card stat-card-inner">
+                <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0 fw-bold display-6">@(students?.Count ?? 0)</h3>
+                    <div class="text-muted">Enrolled Students</div>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
-                <div class="stat-card">
-                    <div class="stat-icon bg-success bg-opacity-10 text-success">
-                        <i class="fas fa-clipboard-check"></i>
-                    </div>
-                    <div>
-                        <h3 class="mb-0 fw-bold">@Model.Count</h3>
-                        <small class="text-muted">Total Attempts</small>
-                    </div>
+
+            <div class="dashboard-card stat-card-inner">
+                <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0 fw-bold display-6">@Model.Count</h3>
+                    <div class="text-muted">Total Attempts</div>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
-                <div class="stat-card">
-                    <div class="stat-icon bg-warning bg-opacity-10 text-warning">
-                        <i class="fas fa-comment-dots"></i>
-                    </div>
-                    <div>
-                        <h3 class="mb-0 fw-bold">@Model.Count(x => !(feedbacks?.Any(f => f.UserProgressId == x.Id) ?? false))</h3>
-                        <small class="text-muted">Pending Feedback</small>
-                    </div>
+
+            <div class="dashboard-card stat-card-inner">
+                <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
+                    <i class="fas fa-comment-dots"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0 fw-bold display-6">@Model.Count(x => !(feedbacks?.Any(f => f.UserProgressId == x.Id) ?? false))</h3>
+                    <div class="text-muted">Feedback Pending</div>
                 </div>
             </div>
         </div>
 
-        <h5 class="fw-bold mb-3">Students</h5>
+        <div class="section-title">
+            <i class="fas fa-users text-primary"></i> Student Directory
+        </div>
 
         @if (studentSummaries == null || studentSummaries.Count == 0)
         {
-            <div class="text-center py-5 bg-white rounded-3 border">
-                <i class="fas fa-user-graduate fa-3x text-muted mb-3"></i>
+            <div class="text-center py-5 dashboard-card">
+                <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
                 <p class="text-muted">No students found.</p>
             </div>
         }
         else
         {
+            <div class="students-grid">
             @foreach (var summary in studentSummaries)
             {
-                <a asp-action="InstructorIndex" asp-route-studentId="@summary.Student.ApplicationUserId" class="student-card">
-                    <div class="student-header">
-                        <div class="avatar">
-                            @((!string.IsNullOrEmpty(summary.Student.FirstName) ? summary.Student.FirstName[0] : 'S'))
-                        </div>
-                        <div class="flex-grow-1">
-                            <h5 class="mb-1">@summary.Student.FirstName @summary.Student.LastName</h5>
-                            <div class="small text-muted">
-                                <span>ID: @summary.Student.StudentId</span>
-                                <span class="mx-2">•</span>
-                                <span>@summary.Student.Email</span>
+                <div class="dashboard-card student-card">
+                    <a asp-action="InstructorIndex" asp-route-studentId="@summary.Student.ApplicationUserId" class="text-decoration-none">
+                        <div class="student-card-header">
+                            <div class="student-avatar">
+                                @((!string.IsNullOrEmpty(summary.Student.FirstName) ? summary.Student.FirstName[0] : 'S'))
+                            </div>
+                            <div class="student-info">
+                                <h5>@summary.Student.FirstName @summary.Student.LastName</h5>
+                                <div class="student-meta">
+                                    <span>ID: @summary.Student.StudentId</span>
+                                    <span class="text-truncate" style="max-width: 180px;">@summary.Student.Email</span>
+                                </div>
                             </div>
                         </div>
-                        <i class="fas fa-chevron-right text-muted"></i>
-                    </div>
 
-                    <div class="student-stats">
-                        <div class="stat-item">
-                            <span class="stat-value text-primary">@summary.AttemptCount</span>
-                            <span class="stat-label">Attempts</span>
+                        <div class="student-card-stats">
+                            <div>
+                                <div class="mini-stat-value text-primary">@summary.AttemptCount</div>
+                                <div class="mini-stat-label">Attempts</div>
+                            </div>
+                            <div>
+                                <div class="mini-stat-value text-success">@summary.CompletedCount</div>
+                                <div class="mini-stat-label">Done</div>
+                            </div>
+                            <div>
+                                <div class="mini-stat-value text-dark">
+                                     @if (summary.CompletedCount > 0)
+                                    {
+                                        @(((double)summary.AverageScore / (summary.CompletedCount > 0 ? 120 : 1) * 100).ToString("F0"))<text>%</text>
+                                    }
+                                    else
+                                    {
+                                        <text>-</text>
+                                    }
+                                </div>
+                                <div class="mini-stat-label">Avg</div>
+                            </div>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-value text-success">@summary.CompletedCount</span>
-                            <span class="stat-label">Completed</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value text-warning">@summary.PendingFeedback</span>
-                            <span class="stat-label">Pending</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value text-info">
-                                @if (summary.CompletedCount > 0)
-                                {
-                                    @(((double)summary.AverageScore / (summary.CompletedCount > 0 ? 120 : 1) * 100).ToString("F0"))<text>%</text>
-                                }
-                                else
-                                {
-                                    <text>N/A</text>
-                                }
-                            </span>
-                            <span class="stat-label">Avg Score</span>
-                        </div>
-                    </div>
-                </a>
+                    </a>
+                </div>
             }
+            </div>
         }
     }
 </div>
-

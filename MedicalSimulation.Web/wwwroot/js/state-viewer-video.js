@@ -96,9 +96,9 @@ class StateViewerVideo {
         this.isTransitioning = true;
         this.updateUI(state);
 
-        // For the first state, seek to 6 seconds instead of the beginning
-        if (index === 0) {
-            this.video.currentTime = 6;
+        // For Carotid Artery Stenting (ID 3), seek to 5 seconds instead of the beginning
+        if (index === 0 && this.simulationId === 3) {
+            this.video.currentTime = 5;
         }
         // Otherwise, continue playing from current position
 

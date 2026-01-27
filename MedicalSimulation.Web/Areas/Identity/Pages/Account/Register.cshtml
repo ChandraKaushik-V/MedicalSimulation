@@ -94,13 +94,62 @@
         font-weight: 700;
         border-radius: 0.75rem;
         width: 100%;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
     }
 
     .btn-register:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .role-selection {
+        margin-bottom: 1.5rem;
+    }
+
+    .role-selection label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #6b7280;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .role-options {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .role-option {
+        flex: 1;
+        position: relative;
+    }
+
+    .role-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .role-option label {
+        display: block;
+        padding: 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.75rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 600;
+        color: #6b7280;
+    }
+
+    .role-option input[type="radio"]:checked + label {
+        border-color: #667eea;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        color: #667eea;
+    }
+
+    .role-option label:hover {
+        border-color: #667eea;
     }
 
     .auth-footer {
@@ -174,12 +223,24 @@
                     <label asp-for="Input.ConfirmPassword">Confirm Password</label>
                     <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
                 </div>
-                <div class="form-floating">
-                    <select asp-for="Input.Role" class="form-control" aria-required="true" id="roleSelect" onchange="toggleRoleFields()">
-                        <option value="Student">Student</option>
-                        <option value="Instructor">Instructor</option>
-                    </select>
-                    <label asp-for="Input.Role">Role</label>
+                <div class="role-selection">
+                    <label>Select Your Role</label>
+                    <div class="role-options">
+                        <div class="role-option">
+                            <input type="radio" asp-for="Input.Role" value="Student" id="roleStudent" checked onchange="toggleRoleFields()" />
+                            <label for="roleStudent">
+                                <i class="fas fa-user-graduate" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
+                                Student
+                            </label>
+                        </div>
+                        <div class="role-option">
+                            <input type="radio" asp-for="Input.Role" value="Instructor" id="roleInstructor" onchange="toggleRoleFields()" />
+                            <label for="roleInstructor">
+                                <i class="fas fa-chalkboard-teacher" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
+                                Instructor
+                            </label>
+                        </div>
+                    </div>
                     <span asp-validation-for="Input.Role" class="text-danger"></span>
                 </div>
                 
@@ -225,7 +286,7 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         function toggleRoleFields() {
-            var role = document.getElementById('roleSelect').value;
+            var role = document.querySelector('input[name="Input.Role"]:checked').value;
             var studentFields = document.getElementById('studentFields');
             var instructorFields = document.getElementById('instructorFields');
             

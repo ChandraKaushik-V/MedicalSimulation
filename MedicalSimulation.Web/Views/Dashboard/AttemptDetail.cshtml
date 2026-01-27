@@ -15,7 +15,7 @@
     <a asp-action="Index" class="btn btn-outline-primary mb-3">
         <i class="fas fa-arrow-left"></i> Back to Dashboard
     </a>
-    <h1>
+    <h1 style="color: #667eea; font-size: 2rem;">
         <i class="fas fa-chart-bar"></i>
         Simulation Attempt Details
     </h1>
@@ -70,7 +70,7 @@
     <!-- Attempt Information -->
     <div class="col-lg-4">
         <div class="card shadow-sm mb-4">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                 <h5 class="mb-0"><i class="fas fa-info-circle"></i> Attempt Information</h5>
             </div>
             <div class="card-body p-3">
@@ -152,7 +152,7 @@
     <!-- Score Breakdown Chart -->
     <div class="col-lg-4">
         <div class="card shadow-sm mb-4">
-            <div class="card-header bg-success text-white">
+            <div class="card-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
                 <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Score Breakdown</h5>
             </div>
             <div class="card-body p-3" style="height: 350px; display: flex; align-items: center; justify-content: center;">
@@ -164,7 +164,7 @@
     <!-- Progress Chart -->
     <div class="col-lg-4">
         <div class="card shadow-sm mb-4">
-            <div class="card-header bg-info text-white">
+            <div class="card-header" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
                 <h5 class="mb-0"><i class="fas fa-chart-line"></i> Progress Trend</h5>
             </div>
             <div class="card-body p-3" style="height: 350px;">
@@ -178,8 +178,8 @@
 @if (feedback != null)
 {
     <div class="card shadow-sm mb-4" style="border-left: 4px solid #007bff;">
-        <div class="card-header" style="background-color: #e7f3ff;">
-            <h5 class="mb-0 text-primary">
+        <div class="card-header" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border-bottom: 2px solid #667eea;">
+            <h5 class="mb-0" style="color: #667eea;">
                 <i class="fas fa-comment-dots"></i> Instructor Feedback
             </h5>
         </div>
