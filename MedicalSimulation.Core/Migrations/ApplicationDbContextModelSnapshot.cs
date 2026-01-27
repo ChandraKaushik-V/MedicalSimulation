@@ -61,7 +61,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasIndex("UserProgressId");
 
-                    b.ToTable("Feedbacks", (string)null);
+                    b.ToTable("Feedbacks");
                 });
 
             modelBuilder.Entity("MedicalSimulation.Core.Models.Instructor", b =>
@@ -106,7 +106,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasIndex("ValidEmployeeIdId");
 
-                    b.ToTable("Instructors", (string)null);
+                    b.ToTable("Instructors");
                 });
 
             modelBuilder.Entity("MedicalSimulation.Core.Models.InstructorSpecialization", b =>
@@ -126,7 +126,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("InstructorSpecializations", (string)null);
+                    b.ToTable("InstructorSpecializations");
 
                     b.HasData(
                         new
@@ -190,13 +190,13 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasIndex("SpecialtyId");
 
-                    b.ToTable("Simulations", (string)null);
+                    b.ToTable("Simulations");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2026, 1, 21, 17, 13, 48, 148, DateTimeKind.Utc).AddTicks(4004),
+                            CreatedAt = new DateTime(2026, 1, 27, 9, 54, 4, 27, DateTimeKind.Utc).AddTicks(4732),
                             Description = "Master the subcuticular running suture technique with this interactive video simulation.",
                             Difficulty = 2,
                             EstimatedMinutes = 15,
@@ -209,14 +209,27 @@ namespace MedicalSimulation.Core.Migrations
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2026, 1, 21, 17, 13, 48, 148, DateTimeKind.Utc).AddTicks(6484),
+                            CreatedAt = new DateTime(2026, 1, 27, 9, 54, 4, 27, DateTimeKind.Utc).AddTicks(7377),
                             Description = "Learn the critical steps and anatomical considerations in performing a posterior neck craniectomy.",
                             Difficulty = 3,
                             EstimatedMinutes = 10,
                             IsActive = true,
-                            SpecialtyId = 1,
+                            SpecialtyId = 2,
                             ThumbnailUrl = "/pictures/craniectomy.png",
                             Title = "Posterior Neck Craniectomy",
+                            TotalStates = 6
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2026, 1, 27, 9, 54, 4, 27, DateTimeKind.Utc).AddTicks(7382),
+                            Description = "Learn the essential steps and techniques for performing carotid artery stenting to restore blood flow.",
+                            Difficulty = 3,
+                            EstimatedMinutes = 10,
+                            IsActive = true,
+                            SpecialtyId = 3,
+                            ThumbnailUrl = "/pictures/cartoid.jpg",
+                            Title = "Carotid Artery Stenting",
                             TotalStates = 6
                         });
                 });
@@ -251,16 +264,38 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Specialties", (string)null);
+                    b.ToTable("Specialties");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            Description = "Fundamental techniques for all surgeons",
-                            DisplayOrder = 0,
+                            Color = "#10b981",
+                            Description = "Skin and related conditions, including surgical procedures",
+                            DisplayOrder = 1,
+                            IconClass = "fa-hand-holding-medical",
                             IsActive = true,
-                            Name = "Basic Surgical Skills"
+                            Name = "Dermatology"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Color = "#8b5cf6",
+                            Description = "Brain, spinal cord, and nervous system procedures",
+                            DisplayOrder = 2,
+                            IconClass = "fa-brain",
+                            IsActive = true,
+                            Name = "Neurology"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Color = "#ef4444",
+                            Description = "Heart and cardiovascular system procedures",
+                            DisplayOrder = 3,
+                            IconClass = "fa-heart-pulse",
+                            IsActive = true,
+                            Name = "Cardiology"
                         });
                 });
 
@@ -300,7 +335,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("Students", (string)null);
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("MedicalSimulation.Core.Models.SurgeryState", b =>
@@ -350,7 +385,7 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasIndex("SimulationId");
 
-                    b.ToTable("SurgeryStates", (string)null);
+                    b.ToTable("SurgeryStates");
 
                     b.HasData(
                         new
@@ -518,6 +553,96 @@ namespace MedicalSimulation.Core.Migrations
                             StateName = "Post-Excision Management",
                             StateNumber = 6,
                             VideoUrl = "/videos/simulations/craniectomy.mp4"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            AnswerOptionsJson = "[\"Radial artery\",\"Radial vein\",\"Ulnar artery\",\"Cephalic vein\"]",
+                            CorrectAnswerIndex = 0,
+                            Description = "Identify the vessel being accessed for arterial entry.",
+                            HotspotDataJson = "{\"pauseTime\":10}",
+                            InteractionType = "mcq",
+                            LayersJson = "[]",
+                            QuestionText = "Which vessel is being accessed for arterial entry?",
+                            SimulationId = 3,
+                            StateName = "Arterial Access Vessel",
+                            StateNumber = 1,
+                            VideoUrl = "/videos/simulations/Cartoid-artery-stenting.mp4"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            AnswerOptionsJson = "[\"Deploy the carotid stent\",\"Insert an introducer sheath over the guidewire\",\"Inflate the balloon to dilate the artery\",\"Close the puncture site\"]",
+                            CorrectAnswerIndex = 1,
+                            Description = "Determine the next step after successful arterial puncture and guidewire placement.",
+                            HotspotDataJson = "{\"pauseTime\":15}",
+                            InteractionType = "mcq",
+                            LayersJson = "[]",
+                            QuestionText = "After successful arterial puncture and guidewire placement, what is the next step in carotid artery stenting?",
+                            SimulationId = 3,
+                            StateName = "Next Step After Guidewire",
+                            StateNumber = 2,
+                            VideoUrl = "/videos/simulations/Cartoid-artery-stenting.mp4"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            AnswerOptionsJson = "[\"To inject contrast directly into the brain\",\"To maintain stable arterial access for catheter and device passage\",\"To remove arterial plaque\",\"To close the puncture site\"]",
+                            CorrectAnswerIndex = 1,
+                            Description = "Understand the primary purpose of inserting the sheath.",
+                            HotspotDataJson = "{\"pauseTime\":28}",
+                            InteractionType = "mcq",
+                            LayersJson = "[]",
+                            QuestionText = "What is the primary purpose of inserting this sheath at this stage of the procedure?",
+                            SimulationId = 3,
+                            StateName = "Purpose of Sheath Insertion",
+                            StateNumber = 3,
+                            VideoUrl = "/videos/simulations/Cartoid-artery-stenting.mp4"
+                        },
+                        new
+                        {
+                            Id = 16,
+                            AnswerOptionsJson = "[\"To dissolve the plaque\",\"To visualize the carotid artery and identify the stenosis\",\"To widen the artery\",\"To anesthetize the vessel\"]",
+                            CorrectAnswerIndex = 1,
+                            Description = "Identify why contrast dye is injected at this stage.",
+                            HotspotDataJson = "{\"pauseTime\":45}",
+                            InteractionType = "mcq",
+                            LayersJson = "[]",
+                            QuestionText = "Why is contrast dye injected at this stage of the carotid artery stenting procedure?",
+                            SimulationId = 3,
+                            StateName = "Contrast Dye Purpose",
+                            StateNumber = 4,
+                            VideoUrl = "/videos/simulations/Cartoid-artery-stenting.mp4"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            AnswerOptionsJson = "[\"In the subclavian artery\",\"In the internal carotid artery at the site of stenosis\",\"In the external carotid artery\",\"In the aortic arch\"]",
+                            CorrectAnswerIndex = 1,
+                            Description = "Identify the correct location for stent deployment.",
+                            HotspotDataJson = "{\"pauseTime\":55}",
+                            InteractionType = "mcq",
+                            LayersJson = "[]",
+                            QuestionText = "Where should the stent be deployed during a carotid artery stenting procedure?",
+                            SimulationId = 3,
+                            StateName = "Stent Deployment Location",
+                            StateNumber = 5,
+                            VideoUrl = "/videos/simulations/Cartoid-artery-stenting.mp4"
+                        },
+                        new
+                        {
+                            Id = 18,
+                            AnswerOptionsJson = "[\"To dissolve the plaque chemically\",\"To widen the narrowed artery and restore blood flow\",\"To block blood flow to the brain\",\"To remove the artery wall\"]",
+                            CorrectAnswerIndex = 1,
+                            Description = "Understand the primary purpose of deploying the stent.",
+                            HotspotDataJson = "{\"pauseTime\":100,\"endTime\":106}",
+                            InteractionType = "mcq",
+                            LayersJson = "[]",
+                            QuestionText = "What is the primary purpose of deploying the stent at this location?",
+                            SimulationId = 3,
+                            StateName = "Purpose of Stent Deployment",
+                            StateNumber = 6,
+                            VideoUrl = "/videos/simulations/Cartoid-artery-stenting.mp4"
                         });
                 });
 
@@ -532,14 +657,8 @@ namespace MedicalSimulation.Core.Migrations
                     b.Property<int>("AttemptNumber")
                         .HasColumnType("int");
 
-                    b.Property<string>("ClinicalErrorsJson")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("DetailedStepDataJson")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FeedbackJson")
                         .HasColumnType("nvarchar(max)");
@@ -549,9 +668,6 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.Property<int>("MaxScore")
                         .HasColumnType("int");
-
-                    b.Property<string>("PerformanceMetricsJson")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Score")
                         .HasColumnType("int");
@@ -569,16 +685,13 @@ namespace MedicalSimulation.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("VitalSignsHistoryJson")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("SimulationId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserProgress", (string)null);
+                    b.ToTable("UserProgress");
                 });
 
             modelBuilder.Entity("MedicalSimulation.Core.Models.ValidInstructorEmployeeId", b =>
@@ -609,13 +722,13 @@ namespace MedicalSimulation.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ValidInstructorEmployeeIds", (string)null);
+                    b.ToTable("ValidInstructorEmployeeIds");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2026, 1, 21, 17, 13, 48, 148, DateTimeKind.Utc).AddTicks(625),
+                            CreatedAt = new DateTime(2026, 1, 27, 9, 54, 4, 27, DateTimeKind.Utc).AddTicks(1376),
                             EmployeeId = "EMP001",
                             FirstName = "John",
                             IsActive = true,
@@ -624,7 +737,7 @@ namespace MedicalSimulation.Core.Migrations
                         new
                         {
                             Id = 2,
-                            CreatedAt = new DateTime(2026, 1, 21, 17, 13, 48, 148, DateTimeKind.Utc).AddTicks(2126),
+                            CreatedAt = new DateTime(2026, 1, 27, 9, 54, 4, 27, DateTimeKind.Utc).AddTicks(2943),
                             EmployeeId = "EMP002",
                             FirstName = "Jane",
                             IsActive = true,
@@ -633,7 +746,7 @@ namespace MedicalSimulation.Core.Migrations
                         new
                         {
                             Id = 3,
-                            CreatedAt = new DateTime(2026, 1, 21, 17, 13, 48, 148, DateTimeKind.Utc).AddTicks(2130),
+                            CreatedAt = new DateTime(2026, 1, 27, 9, 54, 4, 27, DateTimeKind.Utc).AddTicks(2946),
                             EmployeeId = "EMP003",
                             FirstName = "Michael",
                             IsActive = true,
@@ -642,7 +755,7 @@ namespace MedicalSimulation.Core.Migrations
                         new
                         {
                             Id = 4,
-                            CreatedAt = new DateTime(2026, 1, 21, 17, 13, 48, 148, DateTimeKind.Utc).AddTicks(2132),
+                            CreatedAt = new DateTime(2026, 1, 27, 9, 54, 4, 27, DateTimeKind.Utc).AddTicks(2949),
                             EmployeeId = "EMP004",
                             FirstName = "Sarah",
                             IsActive = true,
@@ -651,7 +764,7 @@ namespace MedicalSimulation.Core.Migrations
                         new
                         {
                             Id = 5,
-                            CreatedAt = new DateTime(2026, 1, 21, 17, 13, 48, 148, DateTimeKind.Utc).AddTicks(2180),
+                            CreatedAt = new DateTime(2026, 1, 27, 9, 54, 4, 27, DateTimeKind.Utc).AddTicks(2950),
                             EmployeeId = "EMP005",
                             FirstName = "David",
                             IsActive = true,
