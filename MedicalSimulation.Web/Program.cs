@@ -160,6 +160,7 @@ using (var scope = app.Services.CreateScope())
     await context.Database.ExecuteSqlRawAsync(@"
         UPDATE Simulations SET SpecialtyId = 1 WHERE Id = 1;
         UPDATE Simulations SET SpecialtyId = 2 WHERE Id = 2;
+        UPDATE Simulations SET SpecialtyId = 3 WHERE Id = 3;
     ");
     
     // NOW run DbInitializer after schema is fixed
