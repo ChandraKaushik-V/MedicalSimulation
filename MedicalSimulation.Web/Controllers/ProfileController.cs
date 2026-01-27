@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MedicalSimulation.Core.Data;
-using MedicalSimulation.Core.Models;
+using MedicalSimulation.Core.Services.Interfaces;
 using System.Security.Claims;
 
 namespace MedicalSimulation.Web.Controllers;
@@ -10,36 +8,27 @@ namespace MedicalSimulation.Web.Controllers;
 [Authorize(Roles = "Student")]
 public class ProfileController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IProfileService _profileService;
 
-    public ProfileController(ApplicationDbContext context)
+    public ProfileController(IProfileService profileService)
     {
-        _context = context;
+        _profileService = profileService;
     }
 
     public async Task<IActionResult> Index()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        // Get student information
-        var student = await _context.Students
-            .FirstOrDefaultAsync(s => s.ApplicationUserId == userId);
-
-        // Get ApplicationUser for additional details
-        var user = await _context.Users
-            .OfType<ApplicationUser>()
-            .FirstOrDefaultAsync(u => u.Id == userId);
-
-        // Create a ViewModel combining both
-        var profileData = new
+        if (userId == null)
         {
-            FirstName = student?.FirstName ?? user?.FirstName ?? "",
-            LastName = student?.LastName ?? user?.LastName ?? "",
-            Email = student?.Email ?? user?.Email ?? "",
-            PhoneNumber = student?.PhoneNumber ?? user?.PhoneNumber ?? "",
-            StudentId = student?.StudentId ?? "N/A",
-            CreatedAt = user?.CreatedAt ?? DateTime.UtcNow
-        };
+            return Unauthorized();
+        }
+
+        var profileData = await _profileService.GetUserProfileAsync(userId);
+
+        if (profileData == null)
+        {
+            return NotFound();
+        }
 
         ViewBag.ProfileData = profileData;
 
