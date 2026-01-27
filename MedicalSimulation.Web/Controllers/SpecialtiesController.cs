@@ -1,36 +1,28 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MedicalSimulation.Core.Data;
+using MedicalSimulation.Core.Services.Interfaces;
 
 namespace MedicalSimulation.Web.Controllers;
 
 [Authorize]
 public class SpecialtiesController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ISpecialtyService _specialtyService;
 
-    public SpecialtiesController(ApplicationDbContext context)
+    public SpecialtiesController(ISpecialtyService specialtyService)
     {
-        _context = context;
+        _specialtyService = specialtyService;
     }
 
     public async Task<IActionResult> Index()
     {
-        var specialties = await _context.Specialties
-            .Where(s => s.IsActive)
-            .OrderBy(s => s.DisplayOrder)
-            .Include(s => s.Simulations)
-            .ToListAsync();
-
+        var specialties = await _specialtyService.GetAllActiveSpecialtiesAsync();
         return View(specialties);
     }
 
     public async Task<IActionResult> Details(int id)
     {
-        var specialty = await _context.Specialties
-            .Include(s => s.Simulations.Where(sim => sim.IsActive))
-            .FirstOrDefaultAsync(s => s.Id == id);
+        var specialty = await _specialtyService.GetSpecialtyDetailsAsync(id);
 
         if (specialty == null)
         {

@@ -32,6 +32,13 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => {
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+// Register Service Layer
+builder.Services.AddScoped<MedicalSimulation.Core.Services.Interfaces.IDashboardService, MedicalSimulation.Core.Services.Implementations.DashboardService>();
+builder.Services.AddScoped<MedicalSimulation.Core.Services.Interfaces.ISimulationService, MedicalSimulation.Core.Services.Implementations.SimulationService>();
+builder.Services.AddScoped<MedicalSimulation.Core.Services.Interfaces.ISpecialtyService, MedicalSimulation.Core.Services.Implementations.SpecialtyService>();
+builder.Services.AddScoped<MedicalSimulation.Core.Services.Interfaces.IProfileService, MedicalSimulation.Core.Services.Implementations.ProfileService>();
+
+
 // Add session support for simulation state
 builder.Services.AddSession(options =>
 {

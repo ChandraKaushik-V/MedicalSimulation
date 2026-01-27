@@ -1,16 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MedicalSimulation.Core.Data;
+using MedicalSimulation.Core.Services.Interfaces;
 
 namespace MedicalSimulation.Web.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ISpecialtyService _specialtyService;
 
-    public HomeController(ApplicationDbContext context)
+    public HomeController(ISpecialtyService specialtyService)
     {
-        _context = context;
+        _specialtyService = specialtyService;
     }
 
     public async Task<IActionResult> Index()
@@ -22,13 +21,8 @@ public class HomeController : Controller
             {
                 return RedirectToAction("InstructorIndex", "Dashboard");
             }
-            
-            var specialties = await _context.Specialties
-                .Where(s => s.IsActive)
-                .OrderBy(s => s.DisplayOrder)
-                .Take(6)
-                .ToListAsync();
 
+            var specialties = await _specialtyService.GetAllActiveSpecialtiesAsync(limit: 6);
             ViewBag.Specialties = specialties;
         }
 
