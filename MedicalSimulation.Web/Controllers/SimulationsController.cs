@@ -89,8 +89,24 @@ public class SimulationsController : Controller
     [HttpPost]
     public async Task<IActionResult> ValidateAnswer([FromBody] AnswerSubmissionDto submission)
     {
-        var isCorrect = await _simulationService.ValidateAnswerAsync(submission);
-        return Ok(new { isCorrect });
+        var progressId = HttpContext.Session.GetInt32("CurrentProgressId");
+        
+        if (progressId == null)
+        {
+            return BadRequest("No active simulation session");
+        }
+
+        var result = await _simulationService.ValidateAnswerAsync(
+            progressId.Value, 
+            submission.StateId, 
+            submission.AnswerIndex, 
+            0); // timeSpentSeconds - can be added to DTO if needed
+            
+        return Ok(new { 
+            isCorrect = result.IsCorrect,
+            correctAnswerIndex = result.CorrectAnswerIndex,
+            pointsEarned = result.PointsEarned
+        });
     }
 
     [HttpPost]

@@ -10,6 +10,10 @@ public class InstructorDashboardDto
     public List<StudentSummary>? StudentSummaries { get; set; }
     public string? SelectedStudentId { get; set; }
     public Student? SelectedStudent { get; set; }
+    public int TotalRecords { get; set; }
+    public int PageNumber { get; set; }
+    public int PageSize { get; set; }
+    public int PendingFeedbackCount { get; set; }
 }
 
 public class StudentSummary
