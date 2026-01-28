@@ -11,6 +11,83 @@
     var timeTaken = Model.CompletedAt.HasValue ? (Model.CompletedAt.Value - Model.StartedAt).TotalMinutes : 0;
 }
 
+<style>
+    /* Custom styles to fix congestion */
+    .section-header {
+        padding: 1.5rem 1.5rem; /* Increased padding (py-4 equivalent) */
+        background-color: #fff;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .section-title {
+        font-size: 1.25rem; /* Larger font size (h4 equivalent) */
+        font-weight: 700;
+        color: #212529;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .section-title i {
+        margin-right: 1rem; /* More space between icon and text */
+        color: #0d6efd; /* Primary color */
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 0; /* More vertical breathing room */
+        border-bottom: 1px solid #f1f3f5;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .info-item:first-child {
+        padding-top: 0;
+    }
+    
+    .info-label {
+        flex: 0 0 160px; /* Slightly wider label area */
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 1rem;
+    }
+    
+    .info-label i {
+        margin-right: 12px;
+        width: 24px;
+        text-align: center;
+    }
+    
+    .info-value {
+        flex: 1;
+        font-size: 1rem;
+        color: #212529;
+    }
+
+    .feedback-box {
+        background-color: #f8f9fa;
+        border-left: 5px solid #0d6efd;
+        border-radius: 4px;
+        padding: 1.5rem;
+    }
+
+    .instructor-avatar {
+        width: 48px;
+        height: 48px;
+        background-color: #e9ecef;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: #0d6efd;
+    }
+</style>
+
 <div class="page-header">
     <a asp-action="Index" class="btn btn-outline-primary mb-3">
         <i class="fas fa-arrow-left"></i> Back to Dashboard
@@ -19,11 +96,11 @@
         <i class="fas fa-chart-bar"></i>
         Simulation Attempt Details
     </h1>
-    <p>@Model.Simulation?.Title</p>
+    <p class="text-muted lead">@Model.Simulation?.Title</p>
 </div>
 
 <!-- Performance Overview Cards -->
-<div class="dashboard-stats">
+<div class="dashboard-stats mb-5">
     <div class="stat-card-large">
         <div class="stat-icon-large" style="color: @Model.Simulation?.Specialty?.Color">
             <i class="fas fa-star"></i>
@@ -66,22 +143,24 @@
 </div>
 
 <!-- Performance Details and Charts -->
-<div class="row mt-4">
+<div class="row g-4">
     <!-- Attempt Information -->
-    <div class="col-lg-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Attempt Information</h5>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100 border-0">
+            <div class="section-header">
+                <h4 class="section-title">
+                    <i class="fas fa-info-circle"></i>Attempt Information
+                </h4>
             </div>
-            <div class="card-body p-3">
-                <div class="info-item mb-2">
+            <div class="card-body p-4">
+                <div class="info-item">
                     <div class="info-label">
                         <i class="fas fa-flask text-primary"></i> Simulation
                     </div>
-                    <div class="info-value">@Model.Simulation?.Title</div>
+                    <div class="info-value fw-bold">@Model.Simulation?.Title</div>
                 </div>
                 
-                <div class="info-item mb-2">
+                <div class="info-item">
                     <div class="info-label">
                         <i class="fas fa-stethoscope" style="color: @Model.Simulation?.Specialty?.Color"></i> Specialty
                     </div>
@@ -92,14 +171,14 @@
                     </div>
                 </div>
                 
-                <div class="info-item mb-2">
+                <div class="info-item">
                     <div class="info-label">
                         <i class="fas fa-play-circle text-info"></i> Started
                     </div>
                     <div class="info-value">@Model.StartedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</div>
                 </div>
                 
-                <div class="info-item mb-2">
+                <div class="info-item">
                     <div class="info-label">
                         <i class="fas fa-check-circle text-success"></i> Completed
                     </div>
@@ -115,7 +194,7 @@
                     </div>
                 </div>
                 
-                <div class="info-item mb-2">
+                <div class="info-item">
                     <div class="info-label">
                         <i class="fas fa-star text-warning"></i> Score
                     </div>
@@ -149,135 +228,79 @@
         </div>
     </div>
 
-    <!-- Score Breakdown Chart -->
-    <div class="col-lg-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Score Breakdown</h5>
-            </div>
-            <div class="card-body p-3" style="height: 350px; display: flex; align-items: center; justify-content: center;">
-                <canvas id="performanceChart"></canvas>
-            </div>
-        </div>
-    </div>
-
     <!-- Progress Chart -->
-    <div class="col-lg-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
-                <h5 class="mb-0"><i class="fas fa-chart-line"></i> Progress Trend</h5>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100 border-0">
+            <div class="section-header">
+                <h4 class="section-title">
+                    <i class="fas fa-chart-line"></i>Progress Trend
+                </h4>
             </div>
-            <div class="card-body p-3" style="height: 350px;">
-                <canvas id="progressChart"></canvas>
+            <div class="card-body p-4 d-flex align-items-center justify-content-center" style="min-height: 400px;">
+                <canvas id="progressChart" style="width: 100%; height: 100%;"></canvas>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Instructor Feedback -->
-@if (feedback != null)
-{
-    <div class="card shadow-sm mb-4" style="border-left: 4px solid #007bff;">
-        <div class="card-header" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border-bottom: 2px solid #667eea;">
-            <h5 class="mb-0" style="color: #667eea;">
-                <i class="fas fa-comment-dots"></i> Instructor Feedback
-            </h5>
-        </div>
-        <div class="card-body">
-            @if (instructor != null)
+<div class="row mt-4 mb-5">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="section-header">
+                <h4 class="section-title">
+                    <i class="fas fa-comment-dots"></i>Instructor Feedback
+                </h4>
+            </div>
+            
+            @if (feedback != null)
             {
-                <p class="mb-2">
-                    <strong>From:</strong> @instructor.FirstName @instructor.LastName
-                    @if (instructor.Specialization != null)
-                    {
-                        <span class="text-muted">(@instructor.Specialization.Name)</span>
-                    }
-                </p>
+                <div class="card-body p-4">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+                        <div class="d-flex align-items-center mb-3 mb-md-0">
+                            @if (instructor != null)
+                            {
+                                <div class="instructor-avatar">
+                                    <i class="fas fa-user-md fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1 text-dark">@instructor.FirstName @instructor.LastName</h5>
+                                    @if (instructor.Specialization != null)
+                                    {
+                                        <div class="text-muted small">@instructor.Specialization.Name Specialist</div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <div class="d-flex align-items-center text-muted">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            <span>@feedback.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</span>
+                        </div>
+                    </div>
+                    
+                    <div class="feedback-box">
+                        <h6 class="text-primary fw-bold mb-2">Comments:</h6>
+                        <p class="mb-0 fs-5" style="line-height: 1.7; white-space: pre-wrap; color: #343a40;">@feedback.FeedbackText</p>
+                    </div>
+                </div>
             }
-            <p class="mb-2"><strong>Date:</strong> @feedback.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</p>
-            <hr />
-            <p style="font-size: 1.1em; line-height: 1.6;">@feedback.FeedbackText</p>
+            else
+            {
+                <div class="card-body p-5 text-center">
+                    <div class="mb-3 text-muted opacity-50">
+                        <i class="fas fa-inbox fa-4x"></i>
+                    </div>
+                    <h5 class="text-secondary fw-normal">No instructor feedback available</h5>
+                    <p class="text-muted mb-0">Feedback will appear here once an instructor reviews your attempt.</p>
+                </div>
+            }
         </div>
     </div>
-}
-else
-{
-    <div class="alert alert-info">
-        <i class="fas fa-info-circle"></i> No instructor feedback available for this attempt yet.
-    </div>
-}
-
-<style>
-    .info-item {
-        display: flex;
-        align-items: center;
-        padding: 8px 0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    
-    .info-item:last-child {
-        border-bottom: none;
-    }
-    
-    .info-label {
-        flex: 0 0 130px;
-        font-weight: 600;
-        color: #495057;
-        font-size: 0.9rem;
-    }
-    
-    .info-label i {
-        margin-right: 6px;
-        width: 18px;
-        text-align: center;
-    }
-    
-    .info-value {
-        flex: 1;
-        font-size: 0.95rem;
-        color: #212529;
-    }
-</style>
+</div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
-        // Performance Pie Chart
-        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-        const scorePercentage = @scorePercentage;
-        const remainingPercentage = 100 - scorePercentage;
-        
-        new Chart(performanceCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Score Achieved', 'Remaining'],
-                datasets: [{
-                    data: [scorePercentage, remainingPercentage],
-                    backgroundColor: [
-                        scorePercentage >= 80 ? '#28a745' : scorePercentage >= 60 ? '#ffc107' : '#dc3545',
-                        '#e9ecef'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.label + ': ' + context.parsed.toFixed(1) + '%';
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
         // Progress Over Time Line Chart
         const progressCtx = document.getElementById('progressChart').getContext('2d');
         const allAttempts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
@@ -299,19 +322,19 @@ else
                 datasets: [{
                     label: 'Your Score',
                     data: allAttempts.map(a => a.score),
-                    borderColor: '#007bff',
-                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
                     tension: 0.3,
                     fill: true,
                     pointRadius: 6,
                     pointHoverRadius: 8,
-                    pointBackgroundColor: '#007bff',
+                    pointBackgroundColor: '#0d6efd',
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2
                 }, {
                     label: 'Your Average',
                     data: Array(allAttempts.length).fill(avgScore),
-                    borderColor: '#28a745',
+                    borderColor: '#198754',
                     backgroundColor: 'transparent',
                     borderDash: [5, 5],
                     borderWidth: 2,
@@ -345,9 +368,15 @@ else
                 plugins: {
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            font: { size: 13 }
+                        }
                     },
                     tooltip: {
+                        padding: 10,
+                        titleFont: { size: 14 },
+                        bodyFont: { size: 13 },
                         callbacks: {
                             title: function(context) {
                                 const idx = context[0].dataIndex;
