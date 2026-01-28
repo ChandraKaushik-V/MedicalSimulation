@@ -37,6 +37,7 @@ builder.Services.AddScoped<MedicalSimulation.Core.Services.Interfaces.IDashboard
 builder.Services.AddScoped<MedicalSimulation.Core.Services.Interfaces.ISimulationService, MedicalSimulation.Core.Services.Implementations.SimulationService>();
 builder.Services.AddScoped<MedicalSimulation.Core.Services.Interfaces.ISpecialtyService, MedicalSimulation.Core.Services.Implementations.SpecialtyService>();
 builder.Services.AddScoped<MedicalSimulation.Core.Services.Interfaces.IProfileService, MedicalSimulation.Core.Services.Implementations.ProfileService>();
+builder.Services.AddScoped<MedicalSimulation.Core.Services.Interfaces.IRegistrationService, MedicalSimulation.Core.Services.Implementations.RegistrationService>();
 
 
 // Add session support for simulation state
@@ -161,6 +162,52 @@ using (var scope = app.Services.CreateScope())
         UPDATE Simulations SET SpecialtyId = 1 WHERE Id = 1;
         UPDATE Simulations SET SpecialtyId = 2 WHERE Id = 2;
         UPDATE Simulations SET SpecialtyId = 3 WHERE Id = 3;
+    ");
+
+    // FIX sp_StartSimulationAttempt - Add TimeSpent initialization
+    await context.Database.ExecuteSqlRawAsync(@"
+        CREATE OR ALTER PROCEDURE [dbo].[sp_StartSimulationAttempt]
+            @UserId NVARCHAR(450),
+            @SimulationId INT,
+            @MaxScore INT = 120
+        AS
+        BEGIN
+            SET NOCOUNT ON;
+
+            DECLARE @AttemptNumber INT = 1;
+
+            SELECT @AttemptNumber = ISNULL(MAX(AttemptNumber), 0) + 1
+            FROM UserProgress
+            WHERE UserId = @UserId
+              AND SimulationId = @SimulationId;
+
+            INSERT INTO UserProgress
+            (
+                UserId,
+                SimulationId,
+                Score,
+                MaxScore,
+                AttemptNumber,
+                IsCompleted,
+                StartedAt,
+                TimeSpent
+            )
+            VALUES
+            (
+                @UserId,
+                @SimulationId,
+                0,
+                @MaxScore,
+                @AttemptNumber,
+                0,
+                GETUTCDATE(),
+                '00:00:00'
+            );
+
+            SELECT 
+                SCOPE_IDENTITY() AS ProgressId,
+                @AttemptNumber AS AttemptNumber;
+        END;
     ");
     
     // NOW run DbInitializer after schema is fixed

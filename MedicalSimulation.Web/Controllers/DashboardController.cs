@@ -85,6 +85,7 @@ public class DashboardController : Controller
             return NotFound();
         }
 
+        TempData["SuccessMessage"] = "Feedback sent successfully!";
         return RedirectToAction(nameof(InstructorIndex));
     }
 

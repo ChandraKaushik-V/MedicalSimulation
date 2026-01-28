@@ -10,4 +10,5 @@ public class StudentDashboardDto
     public List<UserProgress> RecentProgress { get; set; } = new();
     public List<Feedback> Feedbacks { get; set; } = new();
     public List<Instructor> Instructors { get; set; } = new();
+    public List<PerformanceTrendDto> PerformanceTrend { get; set; } = new();
 }

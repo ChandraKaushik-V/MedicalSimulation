@@ -4,6 +4,8 @@ using MedicalSimulation.Core.Models;
 using MedicalSimulation.Core.Services.DTOs;
 using MedicalSimulation.Core.Services.Interfaces;
 using System.Text.Json;
+using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace MedicalSimulation.Core.Services.Implementations;
 
@@ -43,6 +45,7 @@ public class SimulationService : ISimulationService
 
     public async Task<(Simulation? simulation, int progressId)> StartSimulationAsync(int simulationId, string userId)
     {
+        // First get simulation details
         var simulation = await _context.Simulations
             .Include(s => s.Specialty)
             .Include(s => s.States.OrderBy(st => st.StateNumber))
@@ -53,50 +56,72 @@ public class SimulationService : ISimulationService
             return (null, 0);
         }
 
-        // Create new progress entry
-        var attemptNumber = await _context.UserProgress
-            .Where(up => up.UserId == userId && up.SimulationId == simulationId)
-            .CountAsync() + 1;
+        // Call stored procedure to create progress entry
+        int progressId = 0;
+        int attemptNumber = 0;
 
-        var progress = new UserProgress
+        try
         {
-            UserId = userId,
-            SimulationId = simulationId,
-            Score = 0,
-            MaxScore = 120,
-            IsCompleted = false,
-            AttemptNumber = attemptNumber,
-            TimeSpent = TimeSpan.Zero,
-            StartedAt = DateTime.UtcNow
-        };
+            var parameters = new[]
+            {
+                new SqlParameter("@UserId", userId),
+                new SqlParameter("@SimulationId", simulationId),
+                new SqlParameter("@MaxScore", 120)
+            };
 
-        _context.UserProgress.Add(progress);
-        await _context.SaveChangesAsync();
+            using var command = _context.Database.GetDbConnection().CreateCommand();
+            command.CommandText = "sp_StartSimulationAttempt";
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddRange(parameters);
 
-        return (simulation, progress.Id);
+            await _context.Database.OpenConnectionAsync();
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                progressId = Convert.ToInt32(reader.GetDecimal(reader.GetOrdinal("ProgressId")));
+                attemptNumber = reader.GetInt32(reader.GetOrdinal("AttemptNumber"));
+            }
+        }
+        finally
+        {
+            await _context.Database.CloseConnectionAsync();
+        }
+
+        return (simulation, progressId);
     }
 
     public async Task<bool> SubmitProgressAsync(int progressId, ProgressSubmissionDto submission)
     {
-        var progress = await _context.UserProgress.FindAsync(progressId);
-
-        if (progress == null)
+        try
         {
+            var parameters = new[]
+            {
+                new SqlParameter("@ProgressId", progressId),
+                new SqlParameter("@CurrentScore", submission.Score),
+                new SqlParameter("@TimeSpent", TimeSpan.FromSeconds(submission.TimeSpentSeconds)),
+                new SqlParameter("@FeedbackJson", JsonSerializer.Serialize(submission.Feedback) ?? (object)DBNull.Value)
+            };
+
+            using var command = _context.Database.GetDbConnection().CreateCommand();
+            command.CommandText = "sp_UpdateSimulationProgress";
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddRange(parameters);
+
+            await _context.Database.OpenConnectionAsync();
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                return reader.GetInt32(reader.GetOrdinal("Success")) == 1;
+            }
+
             return false;
         }
-
-        progress.Score = submission.Score;
-        progress.IsCompleted = submission.IsCompleted;
-        progress.TimeSpent = TimeSpan.FromSeconds(submission.TimeSpentSeconds);
-        progress.FeedbackJson = JsonSerializer.Serialize(submission.Feedback);
-
-        if (submission.IsCompleted)
+        finally
         {
-            progress.CompletedAt = DateTime.UtcNow;
+            await _context.Database.CloseConnectionAsync();
         }
-
-        await _context.SaveChangesAsync();
-        return true;
     }
 
     public async Task<List<SimulationStateDto>> GetStatesAsync(int simulationId)
@@ -123,16 +148,41 @@ public class SimulationService : ISimulationService
         return states;
     }
 
-    public async Task<bool> ValidateAnswerAsync(AnswerSubmissionDto submission)
+    public async Task<ValidationResultDto> ValidateAnswerAsync(int progressId, int stateId, int answerIndex, int timeSpentSeconds)
     {
-        var state = await _context.SurgeryStates.FindAsync(submission.StateId);
+        var result = new ValidationResultDto();
 
-        if (state == null)
+        try
         {
-            return false;
+            var parameters = new[]
+            {
+                new SqlParameter("@ProgressId", progressId),
+                new SqlParameter("@StateId", stateId),
+                new SqlParameter("@AnswerIndex", answerIndex),
+                new SqlParameter("@TimeSpentSeconds", timeSpentSeconds)
+            };
+
+            using var command = _context.Database.GetDbConnection().CreateCommand();
+            command.CommandText = "sp_ValidateSimulationAnswer";
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddRange(parameters);
+
+            await _context.Database.OpenConnectionAsync();
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                result.IsCorrect = reader.GetBoolean(reader.GetOrdinal("IsCorrect"));
+                result.CorrectAnswerIndex = reader.GetInt32(reader.GetOrdinal("CorrectAnswerIndex"));
+                result.PointsEarned = reader.GetInt32(reader.GetOrdinal("PointsEarned"));
+            }
+        }
+        finally
+        {
+            await _context.Database.CloseConnectionAsync();
         }
 
-        return state.CorrectAnswerIndex == submission.AnswerIndex;
+        return result;
     }
 
     public async Task<bool> UpdateScoreAsync(ScoreUpdateDto scoreUpdate, string userId)
@@ -166,5 +216,41 @@ public class SimulationService : ISimulationService
         }
 
         return progress;
+    }
+
+    public async Task<TimeSpan?> CompleteSimulationAsync(int progressId)
+    {
+        TimeSpan? timeSpent = null;
+
+        try
+        {
+            var parameters = new[]
+            {
+                new SqlParameter("@ProgressId", progressId)
+            };
+
+            using var command = _context.Database.GetDbConnection().CreateCommand();
+            command.CommandText = "sp_CompleteSimulationAttempt";
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddRange(parameters);
+
+            await _context.Database.OpenConnectionAsync();
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                var success = reader.GetInt32(reader.GetOrdinal("Success"));
+                if (success == 1)
+                {
+                    timeSpent = (TimeSpan)reader.GetValue(reader.GetOrdinal("TimeSpent"));
+                }
+            }
+        }
+        finally
+        {
+            await _context.Database.CloseConnectionAsync();
+        }
+
+        return timeSpent;
     }
 }
