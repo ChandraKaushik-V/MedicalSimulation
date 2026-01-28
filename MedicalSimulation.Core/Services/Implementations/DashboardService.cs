@@ -44,7 +44,6 @@ public class DashboardService : IDashboardService
             .Count();
 
         var totalAttempts = userProgress.Count;
-        // Convert score from base 120 to base 100
         var averageScore = userProgress.Any()
             ? userProgress.Average(up => (up.Score / (double)up.MaxScore) * 100)
             : 0;
